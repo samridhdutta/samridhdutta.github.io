@@ -31,6 +31,7 @@ grocery shopping in mind.
   note, not a lab result for the specific item scanned.
 - **Search by name**: type a produce name (e.g. "honeycrisp") to find its PLU
   code without scanning.
+- **Expiry checking**: after scanning a packaged product, enter the expiry date printed on that package. The app immediately reports whether it is good, expiring soon, or expired, and remembers the date on that device. Standard UPC/EAN barcodes identify products but do not encode package-specific expiry dates.
 - **Scan history**: recent lookups are kept in `localStorage` for quick
   re-viewing.
 

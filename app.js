@@ -2,6 +2,7 @@
   "use strict";
 
   const HISTORY_KEY = "produceScanHistory";
+  const EXPIRY_KEY = "produceScanExpiryDates";
   const MAX_HISTORY = 12;
 
   const els = {
@@ -16,6 +17,11 @@
     history: document.getElementById("history"),
     historyList: document.getElementById("historyList"),
     clearHistoryBtn: document.getElementById("clearHistoryBtn"),
+    expiryPanel: document.getElementById("expiryPanel"),
+    expiryProduct: document.getElementById("expiryProduct"),
+    expiryDate: document.getElementById("expiryDate"),
+    checkExpiryBtn: document.getElementById("checkExpiryBtn"),
+    expiryResult: document.getElementById("expiryResult"),
   };
 
   let html5QrCode = null;
@@ -280,6 +286,7 @@
         "openfoodfacts.org directly, or check the package label.</p>" +
         "</div>";
       addHistory(code, "UPC", "Not found");
+      showExpiryChecker(code, "Packaged product");
       return;
     }
 
@@ -329,6 +336,7 @@
       '" target="_blank" rel="noopener">Open Food Facts</a>, a free crowd-sourced database.</p>' +
       "</div>";
     addHistory(code, "UPC", name);
+    showExpiryChecker(code, name);
   }
 
   async function handleCode(raw) {
@@ -382,6 +390,58 @@
           v.emoji + " " + escapeHtml(v.name) + ' <span class="dim">PLU ' + code + "</span></button>"
       )
       .join("");
+  }
+
+
+  // ---------- Expiry checking ----------
+
+  function loadExpiries() {
+    try { return JSON.parse(localStorage.getItem(EXPIRY_KEY) || "{}"); }
+    catch { return {}; }
+  }
+
+  function saveExpiry(code, date, label) {
+    const saved = loadExpiries();
+    saved[code] = { date, label, updatedAt: Date.now() };
+    localStorage.setItem(EXPIRY_KEY, JSON.stringify(saved));
+  }
+
+  function renderExpiryStatus(dateString) {
+    if (!dateString) {
+      els.expiryResult.className = "";
+      els.expiryResult.textContent = "Enter the date printed on the package.";
+      return;
+    }
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const expiry = new Date(dateString + "T00:00:00");
+    const days = Math.ceil((expiry.getTime() - today.getTime()) / 86400000);
+    let tone, text;
+    if (days < 0) {
+      tone = "expiry-expired";
+      text = "Expired " + Math.abs(days) + " day" + (Math.abs(days) === 1 ? "" : "s") + " ago — do not use it.";
+    } else if (days === 0) {
+      tone = "expiry-soon";
+      text = "Expires today — use it now if it is still safe and properly stored.";
+    } else if (days <= 7) {
+      tone = "expiry-soon";
+      text = "Expires in " + days + " day" + (days === 1 ? "" : "s") + " — use it soon.";
+    } else {
+      tone = "expiry-good";
+      text = "Good for " + days + " more days.";
+    }
+    els.expiryResult.className = "expiry-result " + tone;
+    els.expiryResult.textContent = text;
+  }
+
+  function showExpiryChecker(code, label) {
+    els.expiryPanel.hidden = false;
+    els.expiryPanel.dataset.code = code;
+    els.expiryProduct.textContent = label + " · " + code;
+    const saved = loadExpiries()[code];
+    els.expiryDate.value = saved ? saved.date : "";
+    renderExpiryStatus(saved ? saved.date : "");
+    els.expiryPanel.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }
 
   // ---------- History ----------
@@ -469,6 +529,19 @@
     if (!btn) return;
     els.manualInput.value = btn.dataset.code;
     handleCode(btn.dataset.code);
+  });
+
+  els.checkExpiryBtn.addEventListener("click", () => {
+    const code = els.expiryPanel.dataset.code;
+    const date = els.expiryDate.value;
+    if (!date) return renderExpiryStatus("");
+    saveExpiry(code, date, els.expiryProduct.textContent);
+    renderExpiryStatus(date);
+  });
+
+  els.expiryDate.addEventListener("change", () => {
+    els.expiryResult.className = "";
+    els.expiryResult.textContent = "";
   });
 
   els.clearHistoryBtn.addEventListener("click", () => {

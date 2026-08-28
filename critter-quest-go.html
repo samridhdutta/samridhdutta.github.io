@@ -1,0 +1,800 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#145c46">
+  <meta name="description" content="Explore a colourful map, discover original creatures, and build your collection in this free browser game.">
+  <title>Critter Quest GO</title>
+  <style>
+    :root {
+      --ink: #17352f;
+      --muted: #607c74;
+      --cream: #fffdf5;
+      --green: #1e7c5c;
+      --green-dark: #145c46;
+      --lime: #a5e065;
+      --gold: #ffd35a;
+      --coral: #ff715b;
+      --blue: #5bbde9;
+      --panel: rgba(255,255,255,.94);
+      --shadow: 0 14px 38px rgba(14,61,46,.22);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; overscroll-behavior: none; }
+    body {
+      font-family: ui-rounded, "Nunito", "Avenir Next", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: #ccecae;
+    }
+    button, input { font: inherit; }
+    button { -webkit-tap-highlight-color: transparent; }
+
+    .app {
+      position: relative;
+      width: 100%;
+      min-height: 100vh;
+      min-height: 100dvh;
+      overflow: hidden;
+      background: #ccecae;
+    }
+
+    .map {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      background-color: #bde18e;
+      background-image:
+        radial-gradient(circle at 15% 18%, rgba(57,133,77,.28) 0 3px, transparent 4px),
+        radial-gradient(circle at 82% 72%, rgba(57,133,77,.25) 0 4px, transparent 5px),
+        linear-gradient(27deg, transparent 0 44%, rgba(255,255,255,.86) 44% 51%, transparent 51%),
+        linear-gradient(92deg, transparent 0 43%, rgba(255,255,255,.83) 43% 50%, transparent 50%),
+        linear-gradient(147deg, transparent 0 62%, rgba(242,235,205,.86) 62% 68%, transparent 68%);
+      background-size: 70px 70px, 110px 110px, 340px 340px, 290px 290px, 430px 430px;
+      transition: background-position .18s ease;
+      touch-action: none;
+    }
+    .map::before {
+      content: "";
+      position: absolute;
+      width: 42%;
+      height: 26%;
+      right: -12%;
+      top: 19%;
+      border-radius: 52% 0 0 48%;
+      background: #63c5e7;
+      border: 8px solid rgba(255,255,255,.42);
+      transform: rotate(-9deg);
+      box-shadow: inset 0 0 0 3px rgba(24,132,180,.15);
+    }
+    .map::after {
+      content: "";
+      position: absolute;
+      width: 170px;
+      height: 105px;
+      left: -35px;
+      bottom: 13%;
+      background: rgba(70,160,84,.36);
+      border: 7px dotted rgba(23,96,55,.25);
+      border-radius: 48%;
+      transform: rotate(13deg);
+    }
+
+    .tree {
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border-radius: 50% 50% 42% 42%;
+      background: #3d9d58;
+      box-shadow: -8px 3px 0 #55b969, 8px 4px 0 #2e8548, 0 10px 0 -6px #8c633e;
+      opacity: .9;
+      z-index: 1;
+    }
+
+    .topbar {
+      position: absolute;
+      top: max(12px, env(safe-area-inset-top));
+      left: 12px;
+      right: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      z-index: 15;
+      pointer-events: none;
+    }
+    .profile, .resources {
+      pointer-events: auto;
+      background: var(--panel);
+      border: 2px solid rgba(20,92,70,.13);
+      border-radius: 18px;
+      box-shadow: 0 7px 20px rgba(15,75,57,.18);
+      backdrop-filter: blur(8px);
+    }
+    .profile {
+      min-width: 180px;
+      padding: 9px 12px 8px;
+      display: grid;
+      grid-template-columns: 37px 1fr;
+      gap: 8px;
+      align-items: center;
+    }
+    .avatar {
+      width: 37px;
+      height: 37px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(145deg, var(--gold), #ff9f43);
+      border-radius: 50%;
+      border: 3px solid #fff;
+      font-size: 20px;
+    }
+    .trainer-name { font-weight: 900; font-size: .91rem; line-height: 1.1; }
+    .level-row { display: flex; gap: 6px; align-items: center; margin-top: 5px; }
+    .level { color: var(--green); font-size: .7rem; font-weight: 900; white-space: nowrap; }
+    .xp-track { flex: 1; height: 6px; background: #dceae2; border-radius: 99px; overflow: hidden; }
+    .xp-fill { height: 100%; background: linear-gradient(90deg, var(--lime), var(--green)); border-radius: inherit; transition: width .35s; }
+    .resources { display: flex; gap: 10px; padding: 9px 12px; font-weight: 900; font-size: .84rem; }
+    .resource { display: flex; gap: 4px; align-items: center; }
+    .orb-mini {
+      width: 16px; height: 16px; border-radius: 50%; display: inline-block;
+      background: linear-gradient(#ff6d5f 0 44%, #fff 44% 100%);
+      border: 2px solid #364a48; position: relative;
+    }
+    .orb-mini::after { content:""; position:absolute; width:5px; height:5px; background:#fff; border:1px solid #364a48; border-radius:50%; left:3.5px; top:4px; }
+
+    .nearby {
+      position: absolute;
+      top: max(82px, calc(env(safe-area-inset-top) + 72px));
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      background: rgba(20,92,70,.9);
+      color: #fff;
+      border-radius: 99px;
+      padding: 7px 13px;
+      font-size: .76rem;
+      font-weight: 900;
+      box-shadow: 0 6px 14px rgba(15,70,53,.2);
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    .player {
+      position: absolute;
+      left: 50%; top: 50%;
+      width: 54px; height: 54px;
+      transform: translate(-50%,-50%);
+      z-index: 8;
+      display: grid; place-items: center;
+      border-radius: 50%;
+      background: rgba(91,189,233,.28);
+      border: 3px solid rgba(255,255,255,.88);
+      box-shadow: 0 0 0 11px rgba(91,189,233,.12), 0 8px 17px rgba(21,81,68,.26);
+      transition: transform .12s;
+    }
+    .player::before { content: "🧭"; font-size: 30px; filter: drop-shadow(0 2px 1px rgba(0,0,0,.15)); }
+    .player.walking { transform: translate(-50%,-50%) scale(.91) rotate(-7deg); }
+
+    .marker {
+      position: absolute;
+      border: 0;
+      padding: 0;
+      transform: translate(-50%,-50%);
+      z-index: 5;
+      cursor: pointer;
+      background: none;
+      transition: left .18s ease, top .18s ease, transform .18s ease, opacity .18s;
+    }
+    .marker:hover, .marker:focus-visible { transform: translate(-50%,-50%) scale(1.1); outline: none; }
+    .critter-marker {
+      width: 58px; height: 65px;
+      animation: floaty 2s ease-in-out infinite;
+    }
+    .critter-marker .mini-art {
+      width: 48px; height: 48px; margin: 0 auto;
+      display: grid; place-items: center;
+      border-radius: 45% 55% 48% 52%;
+      color: #fff;
+      border: 3px solid rgba(255,255,255,.94);
+      box-shadow: 0 7px 15px rgba(23,83,63,.28);
+      font-size: 24px;
+    }
+    .critter-marker .shadow { width: 35px; height: 8px; margin: 5px auto 0; border-radius: 50%; background: rgba(27,77,55,.2); }
+    @keyframes floaty { 0%,100% { margin-top: 0; } 50% { margin-top: -6px; } }
+
+    .stop-marker { width: 52px; height: 70px; }
+    .stop-top {
+      width: 46px; height: 46px; display:grid; place-items:center; margin:auto;
+      border-radius: 13px; background: linear-gradient(145deg,#7ee5ff,#358bd9);
+      border: 4px solid #fff; box-shadow: 0 7px 17px rgba(24,91,137,.3);
+      color:#fff; font-size:21px; transform: rotate(45deg);
+    }
+    .stop-top span { transform: rotate(-45deg); }
+    .stop-stem { width: 7px; height: 20px; background: #eef8fb; border: 2px solid #4288ae; margin: -1px auto 0; }
+    .stop-ready .stop-top { animation: pulse-stop 1.35s infinite; }
+    @keyframes pulse-stop { 50% { box-shadow: 0 0 0 9px rgba(91,189,233,.25), 0 7px 17px rgba(24,91,137,.3); } }
+
+    .bottom-ui {
+      position: absolute;
+      left: 12px; right: 12px;
+      bottom: max(12px, env(safe-area-inset-bottom));
+      z-index: 16;
+      display: grid;
+      grid-template-columns: 70px 1fr 70px;
+      align-items: end;
+      gap: 9px;
+      pointer-events: none;
+    }
+    .round-btn {
+      pointer-events: auto;
+      width: 62px; height: 62px;
+      border: 3px solid #fff;
+      border-radius: 50%;
+      background: var(--panel);
+      color: var(--ink);
+      box-shadow: 0 8px 20px rgba(15,71,54,.24);
+      font-size: 25px;
+      cursor: pointer;
+      font-weight: 900;
+    }
+    .round-btn:active { transform: scale(.94); }
+    .round-btn small { display:block; font-size:.58rem; margin-top:1px; }
+    .dpad {
+      pointer-events: auto;
+      justify-self: center;
+      display: grid;
+      grid-template-columns: repeat(3, 49px);
+      grid-template-rows: repeat(2, 44px);
+      gap: 4px;
+      padding: 7px;
+      border-radius: 23px;
+      background: rgba(255,255,255,.9);
+      box-shadow: 0 8px 20px rgba(15,71,54,.24);
+      backdrop-filter: blur(8px);
+    }
+    .move-btn {
+      border: 0; border-radius: 13px; background: #e5f2e8; color: var(--green-dark);
+      font-size: 24px; font-weight: 900; cursor: pointer; box-shadow: inset 0 -3px 0 rgba(20,92,70,.13);
+    }
+    .move-btn:active { transform: translateY(2px); box-shadow: none; }
+    .move-up { grid-column: 2; }
+    .move-left { grid-column: 1; grid-row: 2; }
+    .move-down { grid-column: 2; grid-row: 2; }
+    .move-right { grid-column: 3; grid-row: 2; }
+
+    .toast {
+      position: fixed;
+      left: 50%; bottom: 150px;
+      transform: translate(-50%, 18px);
+      z-index: 80;
+      max-width: min(90vw, 430px);
+      background: #17352f;
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 15px;
+      font-weight: 800;
+      font-size: .88rem;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      pointer-events: none;
+      transition: .25s;
+      text-align: center;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%,0); }
+
+    .screen, .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: grid;
+      place-items: center;
+      padding: max(18px, env(safe-area-inset-top)) 18px max(18px, env(safe-area-inset-bottom));
+      background: rgba(12,51,42,.63);
+      backdrop-filter: blur(9px);
+    }
+    .screen[hidden], .modal[hidden] { display: none; }
+    .start-card, .modal-card {
+      width: min(100%, 560px);
+      max-height: 92dvh;
+      overflow: auto;
+      background: var(--cream);
+      border: 3px solid rgba(255,255,255,.8);
+      border-radius: 30px;
+      box-shadow: var(--shadow);
+      padding: 25px;
+      text-align: center;
+    }
+    .logo-orb {
+      width: 86px; height: 86px; margin: 0 auto 12px;
+      border-radius: 46% 54% 48% 52%;
+      display:grid; place-items:center;
+      background: linear-gradient(145deg,var(--lime),var(--green));
+      color:#fff; font-size:42px; border:6px solid #fff;
+      box-shadow: 0 9px 24px rgba(24,104,75,.3);
+      transform: rotate(-6deg);
+    }
+    h1 { margin: 0; font-size: clamp(2.1rem,9vw,3.6rem); line-height:.92; letter-spacing: -.055em; color: var(--green-dark); }
+    .go { color: var(--coral); }
+    .tagline { color: var(--muted); font-weight: 750; line-height: 1.45; margin: 13px auto 18px; max-width: 430px; }
+    .start-card label { display:block; font-weight:900; text-align:left; margin: 0 auto 7px; max-width:370px; }
+    .name-input {
+      width: min(100%,370px); border:2px solid #cee3d8; border-radius:15px; padding:13px 15px;
+      background:#fff; color:var(--ink); font-weight:800; outline:none;
+    }
+    .name-input:focus { border-color:var(--green); box-shadow:0 0 0 4px rgba(30,124,92,.12); }
+    .primary-btn {
+      border:0; border-radius:99px; padding:14px 23px; min-width:190px;
+      color:#fff; background:linear-gradient(135deg,var(--green),var(--green-dark));
+      box-shadow:0 6px 0 #0d4837,0 10px 20px rgba(16,84,62,.22);
+      font-weight:950; font-size:1rem; cursor:pointer; margin-top:15px;
+    }
+    .primary-btn:active { transform:translateY(3px); box-shadow:0 3px 0 #0d4837; }
+    .safety { margin:18px 0 0; padding:10px 12px; border-radius:14px; background:#fff3c8; color:#755414; font-size:.77rem; line-height:1.4; font-weight:750; }
+    .original-note { color:#789089; font-size:.7rem; margin-top:10px; }
+
+    .modal { z-index: 110; }
+    .modal-card { position:relative; text-align:left; }
+    .modal-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px; }
+    .modal-head h2 { margin:0; font-size:1.45rem; }
+    .close-btn { border:0; width:39px; height:39px; border-radius:50%; background:#e5f0e9; color:var(--ink); font-size:20px; cursor:pointer; }
+    .collection-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+    .collection-card { background:#fff; border:2px solid #e3eee7; border-radius:18px; padding:12px 7px; text-align:center; min-height:126px; }
+    .collection-card .mini-art { width:58px; height:58px; border-radius:48%; display:grid; place-items:center; margin:0 auto 7px; font-size:29px; color:#fff; border:3px solid rgba(255,255,255,.9); box-shadow:0 5px 12px rgba(20,80,60,.16); }
+    .collection-card.locked .mini-art { background:#cbd8d1!important; filter:grayscale(1); color:#91a199; }
+    .collection-card strong { display:block; font-size:.79rem; line-height:1.1; }
+    .collection-card small { color:var(--muted); font-size:.66rem; font-weight:800; }
+    .rarity-rare { color:#8b45c4!important; }
+    .rarity-mythic { color:#d25b31!important; }
+    .quest-list { display:grid; gap:10px; }
+    .quest { display:grid; grid-template-columns:43px 1fr; gap:10px; padding:13px; border:2px solid #e0ece5; background:#fff; border-radius:17px; align-items:center; }
+    .quest-icon { width:43px; height:43px; display:grid; place-items:center; border-radius:13px; background:#edf7e8; font-size:22px; }
+    .quest strong { display:block; font-size:.89rem; }
+    .quest small { color:var(--muted); font-weight:700; }
+    .quest-track { height:7px; border-radius:99px; background:#e6eee9; overflow:hidden; margin-top:7px; }
+    .quest-fill { height:100%; background:linear-gradient(90deg,var(--gold),var(--coral)); border-radius:inherit; }
+    .reset-btn { display:block; margin:20px auto 0; border:0; background:transparent; color:#9d5149; text-decoration:underline; cursor:pointer; font-weight:800; font-size:.77rem; }
+
+    .encounter {
+      position: fixed; inset:0; z-index:120; overflow:hidden;
+      background: linear-gradient(#9ed9f0 0 47%,#bde18e 47% 100%);
+      display:flex; flex-direction:column; align-items:center; justify-content:space-between;
+      padding:max(18px,env(safe-area-inset-top)) 18px max(22px,env(safe-area-inset-bottom));
+    }
+    .encounter[hidden] { display:none; }
+    .encounter::before { content:""; position:absolute; left:-15%; right:-15%; top:42%; height:24%; border-radius:50%; background:#d7eeaa; border-top:8px solid rgba(255,255,255,.45); }
+    .encounter-top { position:relative; z-index:2; width:min(100%,520px); display:flex; align-items:center; justify-content:space-between; }
+    .encounter-name { background:rgba(255,255,255,.9); border-radius:18px; padding:9px 14px; box-shadow:0 5px 15px rgba(36,99,85,.16); }
+    .encounter-name strong { display:block; }
+    .encounter-name small { color:var(--muted); font-weight:800; }
+    .flee-btn { border:0; background:rgba(255,255,255,.9); width:45px;height:45px;border-radius:50%;font-size:20px;cursor:pointer; }
+    .encounter-stage { position:relative; z-index:2; flex:1; width:100%; display:grid; place-items:center; min-height:250px; }
+    .big-critter { position:relative; width:190px;height:190px;display:grid;place-items:center;border-radius:47% 53% 45% 55%;border:8px solid rgba(255,255,255,.8);box-shadow:0 18px 0 -7px rgba(42,100,60,.18),0 22px 35px rgba(42,100,60,.2);font-size:88px;animation:big-bob 2s ease-in-out infinite; }
+    .big-critter::before,.big-critter::after { content:""; position:absolute; top:43px; width:17px;height:23px;border-radius:50%;background:#fff;box-shadow:inset 0 -8px 0 #263b39; }
+    .big-critter::before { left:45px; }.big-critter::after { right:45px; }
+    @keyframes big-bob { 50% { transform:translateY(-12px) rotate(2deg); } }
+    .catch-ring { position:absolute; width:225px;height:225px;border-radius:50%;border:5px solid rgba(255,255,255,.75);animation:ring 1.25s ease-in-out infinite; }
+    @keyframes ring { 50% { transform:scale(.68); opacity:.55; } }
+    .encounter-controls { position:relative; z-index:3; width:min(100%,520px); background:rgba(255,255,255,.94); border-radius:25px; padding:15px; box-shadow:0 10px 30px rgba(30,87,64,.23); text-align:center; }
+    .encounter-message { min-height:22px; font-weight:900; color:var(--green-dark); font-size:.87rem; }
+    .aim { position:relative;height:16px;border-radius:99px;background:linear-gradient(90deg,#ff776a,#ffd35a 27%,#62c978 45% 55%,#ffd35a 73%,#ff776a);margin:9px 8px 13px;box-shadow:inset 0 2px 4px rgba(30,60,50,.2); }
+    .aim::after { content:""; position:absolute; left:48%; top:-4px; width:4%; height:24px; border-radius:4px; border:2px solid rgba(255,255,255,.8); }
+    .aim-dot { position:absolute;top:-6px;width:11px;height:28px;border-radius:6px;background:#17352f;transform:translateX(-50%);box-shadow:0 2px 4px rgba(0,0,0,.25); }
+    .throw-row { display:grid;grid-template-columns:90px 1fr 60px;align-items:center;gap:9px; }
+    .berry-btn { border:2px solid #f2d8dc;background:#fff2f3;border-radius:14px;padding:9px 6px;color:#8c3c48;font-weight:900;cursor:pointer; }
+    .berry-btn.active { background:#ff8ba0;color:#fff;border-color:#ff6f8a; }
+    .throw-btn { border:0;border-radius:99px;padding:13px;background:linear-gradient(135deg,var(--coral),#e64a4a);color:#fff;font-weight:950;box-shadow:0 5px 0 #ae3434;cursor:pointer; }
+    .throw-btn:active { transform:translateY(2px);box-shadow:0 3px 0 #ae3434; }
+    .throw-btn:disabled,.berry-btn:disabled { opacity:.55;cursor:not-allowed; }
+    .orb-count { font-weight:950; }
+    .orb-fly { position:absolute;z-index:9;left:50%;bottom:70px;width:45px;height:45px;border-radius:50%;background:linear-gradient(#ff6d5f 0 44%,#fff 44%);border:4px solid #364a48;transform:translateX(-50%);animation:orb-toss .75s ease-in forwards; }
+    @keyframes orb-toss { to { bottom:48%; transform:translateX(-50%) scale(.55) rotate(480deg); } }
+    .caught-flash { animation:caught .6s ease-in-out 2!important; }
+    @keyframes caught { 50% { transform:scale(.35);opacity:.25; } }
+
+    @media (max-width: 560px) {
+      .resources { flex-direction:column;gap:2px;padding:7px 10px; }
+      .profile { min-width:157px; }
+      .nearby { top:max(88px,calc(env(safe-area-inset-top) + 78px)); }
+      .collection-grid { grid-template-columns:repeat(2,1fr); }
+      .start-card,.modal-card { padding:21px 17px;border-radius:25px; }
+      .bottom-ui { grid-template-columns:62px 1fr 62px; }
+      .round-btn { width:57px;height:57px;font-size:22px; }
+      .dpad { grid-template-columns:repeat(3,45px);grid-template-rows:repeat(2,41px); }
+      .big-critter { width:160px;height:160px;font-size:72px; }
+      .big-critter::before { left:36px; }.big-critter::after { right:36px; }
+      .catch-ring { width:193px;height:193px; }
+    }
+
+    @media (max-height: 630px) {
+      .nearby { display:none; }
+      .big-critter { width:135px;height:135px;font-size:61px; }
+      .big-critter::before,.big-critter::after { top:31px;width:14px;height:20px; }
+      .big-critter::before { left:30px; }.big-critter::after { right:30px; }
+      .catch-ring { width:160px;height:160px; }
+      .encounter-controls { padding:10px 13px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,*::before,*::after { animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app" aria-label="Critter Quest GO game">
+    <div class="map" id="map" aria-label="Exploration map">
+      <div class="tree" style="left:12%;top:23%"></div><div class="tree" style="left:18%;top:29%"></div>
+      <div class="tree" style="left:76%;top:15%"></div><div class="tree" style="left:70%;top:78%"></div>
+      <div class="tree" style="left:25%;top:68%"></div><div class="tree" style="left:85%;top:61%"></div>
+      <div id="markers"></div>
+      <div class="player" id="player" aria-label="Your explorer"></div>
+    </div>
+
+    <div class="topbar">
+      <div class="profile" aria-label="Trainer profile">
+        <div class="avatar">🧢</div>
+        <div>
+          <div class="trainer-name" id="trainerName">Explorer</div>
+          <div class="level-row"><span class="level" id="levelText">LV 1</span><div class="xp-track"><div class="xp-fill" id="xpFill"></div></div></div>
+        </div>
+      </div>
+      <div class="resources" aria-label="Supplies">
+        <span class="resource"><span class="orb-mini"></span><span id="orbCount">15</span></span>
+        <span class="resource">🍓 <span id="berryCount">5</span></span>
+      </div>
+    </div>
+
+    <div class="nearby" id="nearby">Move around to find nearby critters</div>
+
+    <div class="bottom-ui">
+      <button class="round-btn" id="collectionBtn" aria-label="Open collection">🎒<small>Critters</small></button>
+      <div class="dpad" aria-label="Walking controls">
+        <button class="move-btn move-up" data-dx="0" data-dy="-1" aria-label="Walk up">↑</button>
+        <button class="move-btn move-left" data-dx="-1" data-dy="0" aria-label="Walk left">←</button>
+        <button class="move-btn move-down" data-dx="0" data-dy="1" aria-label="Walk down">↓</button>
+        <button class="move-btn move-right" data-dx="1" data-dy="0" aria-label="Walk right">→</button>
+      </div>
+      <button class="round-btn" id="questsBtn" aria-label="Open quests">⭐<small>Quests</small></button>
+    </div>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <section class="screen" id="startScreen" aria-labelledby="gameTitle">
+    <div class="start-card">
+      <div class="logo-orb">🌿</div>
+      <h1 id="gameTitle">Critter Quest <span class="go">GO</span></h1>
+      <p class="tagline">Explore a colourful world, discover original critters, and catch them with perfect timing!</p>
+      <label for="nameInput">Choose your explorer name</label>
+      <input class="name-input" id="nameInput" maxlength="16" value="Sammy" autocomplete="nickname">
+      <br>
+      <button class="primary-btn" id="startBtn">Start exploring</button>
+      <p class="safety">🛡️ This version works from home using the arrow controls. If you play outside, stay aware of your surroundings and go with an adult.</p>
+      <p class="original-note">An original creature-catching fan game. No account, download, camera, or location access needed.</p>
+    </div>
+  </section>
+
+  <section class="modal" id="collectionModal" hidden aria-labelledby="collectionTitle">
+    <div class="modal-card">
+      <div class="modal-head"><h2 id="collectionTitle">Your Critter Collection</h2><button class="close-btn" data-close="collectionModal" aria-label="Close">×</button></div>
+      <div class="collection-grid" id="collectionGrid"></div>
+    </div>
+  </section>
+
+  <section class="modal" id="questsModal" hidden aria-labelledby="questsTitle">
+    <div class="modal-card">
+      <div class="modal-head"><h2 id="questsTitle">Explorer Quests</h2><button class="close-btn" data-close="questsModal" aria-label="Close">×</button></div>
+      <div class="quest-list" id="questList"></div>
+      <button class="reset-btn" id="resetBtn">Reset all game progress</button>
+    </div>
+  </section>
+
+  <section class="encounter" id="encounter" hidden aria-labelledby="encounterCritterName">
+    <div class="encounter-top">
+      <div class="encounter-name"><strong id="encounterCritterName">Critter</strong><small id="encounterDetails">Leaf · Common</small></div>
+      <button class="flee-btn" id="fleeBtn" aria-label="Leave encounter">✕</button>
+    </div>
+    <div class="encounter-stage" id="encounterStage">
+      <div class="catch-ring"></div>
+      <div class="big-critter" id="bigCritter"><span id="bigSymbol">🌱</span></div>
+    </div>
+    <div class="encounter-controls">
+      <div class="encounter-message" id="encounterMessage">Tap THROW when the marker is in the green!</div>
+      <div class="aim"><div class="aim-dot" id="aimDot"></div></div>
+      <div class="throw-row">
+        <button class="berry-btn" id="berryBtn">🍓 Berry <span id="encounterBerries">5</span></button>
+        <button class="throw-btn" id="throwBtn">Throw capture orb</button>
+        <div class="orb-count"><span class="orb-mini"></span> <span id="encounterOrbs">15</span></div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const CREATURES = [
+        { id:"spriglet", name:"Spriglet", type:"Leaf", rarity:"Common", symbol:"🌱", colors:["#75cf61","#269a62"], chance:.65, xp:22 },
+        { id:"emberoo", name:"Emberoo", type:"Flame", rarity:"Common", symbol:"🔥", colors:["#ffad4f","#ed5b50"], chance:.63, xp:23 },
+        { id:"bubblip", name:"Bubblip", type:"Water", rarity:"Common", symbol:"💧", colors:["#75dcf4","#418ed9"], chance:.66, xp:21 },
+        { id:"voltkit", name:"Voltkit", type:"Spark", rarity:"Uncommon", symbol:"⚡", colors:["#ffe36c","#e8a532"], chance:.52, xp:34 },
+        { id:"pebblit", name:"Pebblit", type:"Stone", rarity:"Common", symbol:"💎", colors:["#a9b4bd","#6d7f8c"], chance:.64, xp:24 },
+        { id:"moondle", name:"Moondle", type:"Moon", rarity:"Uncommon", symbol:"🌙", colors:["#a998eb","#6258bd"], chance:.50, xp:38 },
+        { id:"puffluff", name:"Puffluff", type:"Air", rarity:"Uncommon", symbol:"☁️", colors:["#d7f4ff","#77b6d2"], chance:.54, xp:35 },
+        { id:"mossaur", name:"Mossaur", type:"Forest", rarity:"Rare", symbol:"🍃", colors:["#5cad65","#176e58"], chance:.35, xp:65 },
+        { id:"glimmerfin", name:"Glimmerfin", type:"Tide", rarity:"Rare", symbol:"🐚", colors:["#62d9d0","#4179c9"], chance:.34, xp:68 },
+        { id:"flarewing", name:"Flarewing", type:"Skyfire", rarity:"Rare", symbol:"🪶", colors:["#ff8e5d","#bf3f75"], chance:.32, xp:72 },
+        { id:"aurorix", name:"Aurorix", type:"Aurora", rarity:"Mythic", symbol:"✨", colors:["#8edcff","#9b5de5"], chance:.19, xp:140 },
+        { id:"solhorn", name:"Solhorn", type:"Sun", rarity:"Mythic", symbol:"☀️", colors:["#ffd95f","#f07842"], chance:.17, xp:160 }
+      ];
+
+      const STOPS = [
+        {id:"s1",x:42,y:43},{id:"s2",x:62,y:49},{id:"s3",x:29,y:66},{id:"s4",x:76,y:70},
+        {id:"s5",x:15,y:28},{id:"s6",x:88,y:25},{id:"s7",x:50,y:82},{id:"s8",x:21,y:89}
+      ];
+      const STORAGE_KEY = "critterQuestGoSaveV1";
+      const defaultState = () => ({
+        started:false, name:"Sammy", x:50, y:50, steps:0, xp:0, level:1,
+        orbs:15, berries:5, caught:{}, seen:{}, stops:{}, catchQuest:0, stopQuest:0,
+        catchReward:false, stopReward:false
+      });
+      let state = loadState();
+      let spawns = [];
+      let activeSpawn = null;
+      let aim = 0;
+      let aimDirection = 1;
+      let aimFrame = 0;
+      let berryActive = false;
+      let busy = false;
+      let toastTimer;
+
+      const $ = (id) => document.getElementById(id);
+      const map = $("map");
+      const markers = $("markers");
+
+      function loadState() {
+        try { return {...defaultState(), ...JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}")}; }
+        catch (_) { return defaultState(); }
+      }
+      function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+      function clamp(n,min,max) { return Math.max(min,Math.min(max,n)); }
+      function distance(a,b) { return Math.hypot(a.x-b.x,a.y-b.y); }
+      function getCreature(id) { return CREATURES.find(c => c.id === id); }
+      function weightedCreature() {
+        const roll = Math.random();
+        const pool = roll < .04 ? CREATURES.filter(c=>c.rarity==="Mythic") : roll < .21 ? CREATURES.filter(c=>c.rarity==="Rare") : roll < .52 ? CREATURES.filter(c=>c.rarity==="Uncommon") : CREATURES.filter(c=>c.rarity==="Common");
+        return pool[Math.floor(Math.random()*pool.length)];
+      }
+      function spawnCritter(nearPlayer=true) {
+        const c = weightedCreature();
+        const angle = Math.random()*Math.PI*2;
+        const radius = nearPlayer ? 7+Math.random()*23 : Math.random()*48;
+        spawns.push({id:"c"+Date.now()+Math.random(), creatureId:c.id, x:clamp(state.x+Math.cos(angle)*radius,2,98), y:clamp(state.y+Math.sin(angle)*radius,2,98)});
+      }
+      function seedSpawns() { spawns=[]; for(let i=0;i<8;i++) spawnCritter(i<5); }
+
+      function updateHUD() {
+        $("trainerName").textContent = state.name;
+        $("levelText").textContent = "LV " + state.level;
+        const needed = state.level * 120;
+        $("xpFill").style.width = Math.min(100,(state.xp/needed)*100) + "%";
+        $("orbCount").textContent = state.orbs;
+        $("berryCount").textContent = state.berries;
+        $("encounterOrbs").textContent = state.orbs;
+        $("encounterBerries").textContent = state.berries;
+        const close = spawns.filter(s=>distance(state,s)<22).length;
+        $("nearby").textContent = close ? `${close} critter${close===1?"":"s"} rustling nearby!` : "Move around to find nearby critters";
+      }
+
+      function awardXP(amount) {
+        state.xp += amount;
+        let needed = state.level*120;
+        while(state.xp >= needed) {
+          state.xp -= needed;
+          state.level++;
+          state.orbs += 5;
+          showToast(`Level up! You reached level ${state.level} and earned 5 orbs.`);
+          needed = state.level*120;
+        }
+      }
+
+      function worldToScreen(item) {
+        const scale = Math.min(window.innerWidth,700)/55;
+        return { left: window.innerWidth/2 + (item.x-state.x)*scale, top: window.innerHeight/2 + (item.y-state.y)*scale };
+      }
+      function visiblePoint(p) { return p.left>-80 && p.left<window.innerWidth+80 && p.top>-90 && p.top<window.innerHeight+90; }
+
+      function renderMap() {
+        markers.innerHTML = "";
+        map.style.backgroundPosition = `${-state.x*6}px ${-state.y*5}px, ${state.x*4}px ${-state.y*3}px, ${-state.x*10}px ${-state.y*10}px, ${state.x*8}px ${-state.y*8}px, ${-state.x*6}px ${state.y*6}px`;
+
+        STOPS.forEach(stop => {
+          const pos = worldToScreen(stop);
+          if(!visiblePoint(pos)) return;
+          const ready = !state.stops[stop.id] || Date.now()-state.stops[stop.id] > 30000;
+          const btn = document.createElement("button");
+          btn.className = `marker stop-marker ${ready && distance(state,stop)<12 ? "stop-ready":""}`;
+          btn.style.left = pos.left+"px"; btn.style.top=pos.top+"px";
+          btn.setAttribute("aria-label","Supply beacon");
+          btn.innerHTML = '<div class="stop-top"><span>✦</span></div><div class="stop-stem"></div>';
+          btn.addEventListener("click",()=>visitStop(stop));
+          markers.appendChild(btn);
+        });
+
+        spawns.forEach(spawn => {
+          const pos = worldToScreen(spawn);
+          if(!visiblePoint(pos)) return;
+          const c = getCreature(spawn.creatureId);
+          const btn = document.createElement("button");
+          btn.className="marker critter-marker";
+          btn.style.left=pos.left+"px"; btn.style.top=pos.top+"px";
+          btn.setAttribute("aria-label",`Wild ${c.name}`);
+          btn.innerHTML=`<div class="mini-art" style="background:linear-gradient(145deg,${c.colors[0]},${c.colors[1]})">${c.symbol}</div><div class="shadow"></div>`;
+          btn.addEventListener("click",()=>beginEncounter(spawn));
+          markers.appendChild(btn);
+        });
+        updateHUD();
+      }
+
+      function move(dx,dy) {
+        if(!$("encounter").hidden || !$("collectionModal").hidden || !$("questsModal").hidden || !$("startScreen").hidden) return;
+        state.x=clamp(state.x+dx*2.5,1,99); state.y=clamp(state.y+dy*2.5,1,99); state.steps++;
+        $("player").classList.add("walking");
+        setTimeout(()=>$("player").classList.remove("walking"),120);
+        if(state.steps%3===0 && spawns.length<12) spawnCritter(true);
+        spawns=spawns.filter(s=>distance(state,s)<62);
+        saveState(); renderMap();
+      }
+
+      function visitStop(stop) {
+        if(distance(state,stop)>=12) { showToast("Walk closer to spin this supply beacon."); return; }
+        const last=state.stops[stop.id]||0;
+        if(Date.now()-last<30000) { showToast("This beacon is recharging. Try again soon!"); return; }
+        state.stops[stop.id]=Date.now(); state.orbs+=3; state.berries+=1; state.stopQuest++;
+        awardXP(15); checkQuestRewards(); saveState(); renderMap();
+        showToast("Supply beacon spun: +3 capture orbs and +1 berry!");
+      }
+
+      function beginEncounter(spawn) {
+        if(distance(state,spawn)>=15) { showToast("That critter is too far away. Walk closer!"); return; }
+        activeSpawn=spawn; const c=getCreature(spawn.creatureId);
+        state.seen[c.id]=(state.seen[c.id]||0)+1; saveState();
+        $("encounterCritterName").textContent=`Wild ${c.name}`;
+        $("encounterDetails").textContent=`${c.type} · ${c.rarity}`;
+        $("bigCritter").style.background=`linear-gradient(145deg,${c.colors[0]},${c.colors[1]})`;
+        $("bigSymbol").textContent=c.symbol;
+        $("encounterMessage").textContent="Tap THROW when the marker is in the green!";
+        $("encounter").hidden=false; berryActive=false; busy=false; updateEncounterButtons();
+        aim=0; aimDirection=1; cancelAnimationFrame(aimFrame); animateAim();
+      }
+
+      function animateAim() {
+        aim += aimDirection*1.6;
+        if(aim>=100){aim=100;aimDirection=-1;} if(aim<=0){aim=0;aimDirection=1;}
+        $("aimDot").style.left=aim+"%";
+        if(!$("encounter").hidden) aimFrame=requestAnimationFrame(animateAim);
+      }
+
+      function updateEncounterButtons() {
+        $("berryBtn").classList.toggle("active",berryActive);
+        $("berryBtn").disabled=busy||state.berries<=0||berryActive;
+        $("throwBtn").disabled=busy||state.orbs<=0;
+        updateHUD();
+      }
+
+      function useBerry() {
+        if(busy||berryActive||state.berries<=0) return;
+        berryActive=true; state.berries--; saveState(); updateEncounterButtons();
+        $("encounterMessage").textContent="Berry used — your catch chance is higher!";
+      }
+
+      function throwOrb() {
+        if(busy||state.orbs<=0||!activeSpawn) return;
+        busy=true; state.orbs--; updateEncounterButtons();
+        const orb=document.createElement("div"); orb.className="orb-fly"; $("encounterStage").appendChild(orb);
+        const accuracy=1-Math.abs(aim-50)/50;
+        const c=getCreature(activeSpawn.creatureId);
+        const chance=Math.min(.94,c.chance+accuracy*.25+(berryActive?.18:0));
+        $("encounterMessage").textContent=accuracy>.78?"Great throw!":"The orb is flying…";
+        setTimeout(()=>{
+          orb.remove();
+          if(Math.random()<chance) catchSuccess(c); else catchFail(c);
+        },780);
+      }
+
+      function catchSuccess(c) {
+        $("bigCritter").classList.add("caught-flash");
+        state.caught[c.id]=(state.caught[c.id]||0)+1; state.catchQuest++;
+        awardXP(c.xp); checkQuestRewards();
+        spawns=spawns.filter(s=>s.id!==activeSpawn.id); saveState();
+        $("encounterMessage").textContent=`Caught ${c.name}! +${c.xp} XP`;
+        setTimeout(()=>{
+          $("bigCritter").classList.remove("caught-flash"); closeEncounter(); renderMap();
+          showToast(`${c.name} was added to your collection!`);
+        },1450);
+      }
+
+      function catchFail(c) {
+        berryActive=false;
+        if(state.orbs<=0) {
+          $("encounterMessage").textContent="You're out of orbs. Visit a blue supply beacon!";
+          busy=false; updateEncounterButtons(); saveState(); return;
+        }
+        if(Math.random()<.12) {
+          $("encounterMessage").textContent=`Oh no — ${c.name} ran away!`;
+          spawns=spawns.filter(s=>s.id!==activeSpawn.id); saveState();
+          setTimeout(()=>{closeEncounter();renderMap();},1200); return;
+        }
+        $("encounterMessage").textContent=`${c.name} popped out. Try another throw!`;
+        busy=false; saveState(); updateEncounterButtons();
+      }
+
+      function closeEncounter() {
+        cancelAnimationFrame(aimFrame); $("encounter").hidden=true; activeSpawn=null; busy=false; berryActive=false;
+      }
+
+      function checkQuestRewards() {
+        if(state.catchQuest>=3&&!state.catchReward){state.catchReward=true;state.orbs+=5;showToast("Quest complete: +5 capture orbs!");}
+        if(state.stopQuest>=2&&!state.stopReward){state.stopReward=true;state.berries+=3;showToast("Quest complete: +3 berries!");}
+      }
+
+      function renderCollection() {
+        $("collectionGrid").innerHTML=CREATURES.map(c=>{
+          const count=state.caught[c.id]||0;
+          return `<div class="collection-card ${count?"":"locked"}"><div class="mini-art" style="background:linear-gradient(145deg,${c.colors[0]},${c.colors[1]})">${count?c.symbol:"?"}</div><strong>${count?c.name:"Undiscovered"}</strong><small class="rarity-${c.rarity.toLowerCase()}">${count?`${c.rarity} · caught ${count}`:"Keep exploring"}</small></div>`;
+        }).join("");
+      }
+
+      function questHTML(icon,title,current,goal,reward,done) {
+        return `<div class="quest"><div class="quest-icon">${done?"✅":icon}</div><div><strong>${title}</strong><small>${done?"Complete! Reward collected":`${Math.min(current,goal)} / ${goal} · Reward: ${reward}`}</small><div class="quest-track"><div class="quest-fill" style="width:${Math.min(100,current/goal*100)}%"></div></div></div></div>`;
+      }
+      function renderQuests() {
+        $("questList").innerHTML=
+          questHTML("🎯","Catch 3 critters",state.catchQuest,3,"5 capture orbs",state.catchReward)+
+          questHTML("✦","Visit 2 supply beacons",state.stopQuest,2,"3 berries",state.stopReward)+
+          questHTML("🥾","Take 50 explorer steps",state.steps,50,"Explorer badge",state.steps>=50);
+      }
+
+      function showToast(message) {
+        clearTimeout(toastTimer); $("toast").textContent=message; $("toast").classList.add("show");
+        toastTimer=setTimeout(()=>$("toast").classList.remove("show"),2600);
+      }
+
+      function startGame() {
+        const name=$("nameInput").value.trim().slice(0,16)||"Explorer";
+        state.name=name; state.started=true; saveState(); $("startScreen").hidden=true; seedSpawns(); renderMap();
+        showToast("Adventure started! Use the arrows or WASD to explore.");
+      }
+
+      document.querySelectorAll(".move-btn").forEach(btn=>btn.addEventListener("click",()=>move(Number(btn.dataset.dx),Number(btn.dataset.dy))));
+      document.addEventListener("keydown",e=>{
+        if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.key)) e.preventDefault();
+        const k=e.key.toLowerCase();
+        if(k==="arrowup"||k==="w")move(0,-1); if(k==="arrowdown"||k==="s")move(0,1); if(k==="arrowleft"||k==="a")move(-1,0); if(k==="arrowright"||k==="d")move(1,0);
+      });
+      let touchStart=null;
+      map.addEventListener("touchstart",e=>{const t=e.changedTouches[0];touchStart={x:t.clientX,y:t.clientY};},{passive:true});
+      map.addEventListener("touchend",e=>{if(!touchStart)return;const t=e.changedTouches[0],dx=t.clientX-touchStart.x,dy=t.clientY-touchStart.y;touchStart=null;if(Math.max(Math.abs(dx),Math.abs(dy))<35)return;if(Math.abs(dx)>Math.abs(dy))move(Math.sign(dx),0);else move(0,Math.sign(dy));},{passive:true});
+      $("startBtn").addEventListener("click",startGame);
+      $("nameInput").addEventListener("keydown",e=>{if(e.key==="Enter")startGame();});
+      $("collectionBtn").addEventListener("click",()=>{renderCollection();$("collectionModal").hidden=false;});
+      $("questsBtn").addEventListener("click",()=>{renderQuests();$("questsModal").hidden=false;});
+      document.querySelectorAll("[data-close]").forEach(btn=>btn.addEventListener("click",()=>$(btn.dataset.close).hidden=true));
+      $("fleeBtn").addEventListener("click",closeEncounter);
+      $("berryBtn").addEventListener("click",useBerry);
+      $("throwBtn").addEventListener("click",throwOrb);
+      $("resetBtn").addEventListener("click",()=>{
+        if(!confirm("Reset your explorer, collection, and all saved progress?"))return;
+        localStorage.removeItem(STORAGE_KEY); state=defaultState(); seedSpawns(); $("questsModal").hidden=true; $("startScreen").hidden=false; $("nameInput").value="Sammy"; renderMap();
+      });
+      window.addEventListener("resize",renderMap);
+
+      seedSpawns();
+      if(state.started) $("startScreen").hidden=true;
+      $("nameInput").value=state.name;
+      renderMap();
+    })();
+  </script>
+</body>
+</html>

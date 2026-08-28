@@ -1,0 +1,854 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="A friendly guide to current book trends for readers from age 1 to 60." />
+  <meta name="theme-color" content="#173f5f" />
+  <title>Book Buzz — Trending reads for ages 1–60</title>
+  <style>
+    :root {
+      --ink: #18324a;
+      --muted: #5d6f7e;
+      --paper: #fffaf0;
+      --card: #ffffff;
+      --blue: #173f5f;
+      --blue-2: #256d85;
+      --orange: #ff7a3d;
+      --yellow: #ffd166;
+      --mint: #b8eadc;
+      --lilac: #ded7ff;
+      --line: #dce5e8;
+      --shadow: 0 18px 46px rgba(25, 51, 72, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 4% 7%, rgba(255, 209, 102, 0.34), transparent 24rem),
+        radial-gradient(circle at 94% 13%, rgba(184, 234, 220, 0.46), transparent 28rem),
+        var(--paper);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+
+    button, input { font: inherit; }
+
+    a { color: inherit; }
+
+    .shell {
+      width: min(1180px, calc(100% - 36px));
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      min-height: 82px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      font-size: 1.22rem;
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      color: white;
+      background: var(--blue);
+      border-radius: 12px 12px 12px 4px;
+      transform: rotate(-3deg);
+      box-shadow: 4px 5px 0 var(--yellow);
+    }
+
+    .updated {
+      padding: 8px 12px;
+      border: 1px solid rgba(23, 63, 95, 0.13);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.72);
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 750;
+      backdrop-filter: blur(10px);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.18fr) minmax(310px, 0.82fr);
+      gap: 38px;
+      align-items: center;
+      padding: 68px 0 52px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 18px;
+      padding: 8px 11px;
+      color: #8a3d1d;
+      background: #ffe0d2;
+      border-radius: 9px;
+      font-size: 0.78rem;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    h1, h2, h3, p { margin-top: 0; }
+
+    h1 {
+      max-width: 790px;
+      margin-bottom: 22px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(3.4rem, 8vw, 6.5rem);
+      line-height: 0.91;
+      letter-spacing: -0.065em;
+    }
+
+    h1 span {
+      position: relative;
+      display: inline-block;
+      color: var(--orange);
+      white-space: nowrap;
+    }
+
+    h1 span::after {
+      content: "";
+      position: absolute;
+      left: 2%;
+      right: 0;
+      bottom: -0.05em;
+      height: 0.11em;
+      background: var(--yellow);
+      border-radius: 999px;
+      transform: rotate(-1.4deg);
+      z-index: -1;
+    }
+
+    .hero-copy {
+      max-width: 650px;
+      margin-bottom: 0;
+      color: var(--muted);
+      font-size: clamp(1.02rem, 2vw, 1.2rem);
+    }
+
+    .trend-board {
+      position: relative;
+      min-height: 390px;
+    }
+
+    .trend-card {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 205px;
+      min-height: 168px;
+      padding: 20px;
+      border: 2px solid var(--ink);
+      border-radius: 24px 24px 24px 6px;
+      box-shadow: 7px 8px 0 var(--ink);
+    }
+
+    .trend-card b {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 1.34rem;
+      line-height: 1.08;
+    }
+
+    .trend-card small {
+      font-weight: 800;
+      letter-spacing: 0.03em;
+    }
+
+    .trend-card:nth-child(1) { top: 8px; left: 14px; background: var(--yellow); transform: rotate(-4deg); }
+    .trend-card:nth-child(2) { top: 45px; right: 0; background: var(--mint); transform: rotate(4deg); }
+    .trend-card:nth-child(3) { bottom: 12px; left: 68px; background: var(--lilac); transform: rotate(2deg); }
+
+    .controls-wrap {
+      position: sticky;
+      top: 12px;
+      z-index: 10;
+      margin-bottom: 34px;
+      padding: 16px;
+      border: 1px solid rgba(23, 63, 95, 0.11);
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.89);
+      box-shadow: 0 12px 34px rgba(25, 51, 72, 0.09);
+      backdrop-filter: blur(18px);
+    }
+
+    .age-picker {
+      margin-bottom: 14px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .age-label {
+      display: block;
+      margin: 0 0 9px 3px;
+      color: var(--muted);
+      font-size: 0.76rem;
+      font-weight: 900;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+
+    .age-options {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 2px 2px 4px;
+      scrollbar-width: none;
+    }
+
+    .age-options::-webkit-scrollbar { display: none; }
+
+    .age-option {
+      flex: 0 0 auto;
+      min-width: 76px;
+      padding: 10px 13px;
+      border: 1.5px solid #cad8dd;
+      border-radius: 12px;
+      color: var(--blue);
+      background: white;
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-weight: 900;
+      transition: transform 160ms ease, border-color 160ms ease, background 160ms ease, color 160ms ease;
+    }
+
+    .age-option:hover { transform: translateY(-1px); border-color: var(--blue-2); }
+    .age-option[aria-pressed="true"] { color: white; border-color: var(--orange); background: var(--orange); }
+
+    .search-row {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .search-box {
+      position: relative;
+    }
+
+    .search-box svg {
+      position: absolute;
+      top: 50%;
+      left: 16px;
+      width: 20px;
+      height: 20px;
+      transform: translateY(-50%);
+      color: var(--blue-2);
+      pointer-events: none;
+    }
+
+    #search {
+      width: 100%;
+      min-height: 50px;
+      padding: 0 16px 0 48px;
+      color: var(--ink);
+      border: 1.5px solid var(--line);
+      border-radius: 14px;
+      outline: none;
+      background: #fff;
+    }
+
+    #search:focus { border-color: var(--blue-2); box-shadow: 0 0 0 4px rgba(37, 109, 133, 0.13); }
+
+    .result-count {
+      min-width: 96px;
+      color: var(--muted);
+      font-size: 0.88rem;
+      font-weight: 800;
+      text-align: right;
+    }
+
+    .filters {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .filters::-webkit-scrollbar { display: none; }
+
+    .filter {
+      flex: 0 0 auto;
+      padding: 9px 14px;
+      border: 0;
+      border-radius: 999px;
+      color: var(--blue);
+      background: #edf4f6;
+      cursor: pointer;
+      font-size: 0.84rem;
+      font-weight: 850;
+      transition: transform 160ms ease, background 160ms ease, color 160ms ease;
+    }
+
+    .filter:hover { transform: translateY(-1px); }
+    .filter[aria-pressed="true"] { color: white; background: var(--blue); }
+    .filter:focus-visible, .age-option:focus-visible, .book-link:focus-visible, .source-link:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
+
+    .section-heading {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 22px;
+    }
+
+    .section-heading h2 {
+      margin-bottom: 4px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(2rem, 5vw, 3rem);
+      letter-spacing: -0.04em;
+    }
+
+    .section-heading p { margin-bottom: 0; color: var(--muted); }
+
+    .book-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+      min-height: 280px;
+    }
+
+    .book-card {
+      display: grid;
+      grid-template-columns: 148px minmax(0, 1fr);
+      gap: 20px;
+      min-height: 300px;
+      padding: 18px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: var(--card);
+      box-shadow: 0 8px 24px rgba(25, 51, 72, 0.07);
+      transition: transform 170ms ease, box-shadow 170ms ease;
+    }
+
+    .book-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+
+    .cover-wrap {
+      position: relative;
+      min-height: 220px;
+      overflow: hidden;
+      border-radius: 13px 13px 13px 4px;
+      background: linear-gradient(145deg, var(--blue), var(--blue-2));
+      box-shadow: 5px 6px 0 #d7e1e5;
+    }
+
+    .cover-wrap img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+    }
+
+    .cover-fallback {
+      display: none;
+      height: 100%;
+      padding: 18px 14px;
+      color: white;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-family: Georgia, "Times New Roman", serif;
+      font-weight: 800;
+      font-size: 1.15rem;
+    }
+
+    .book-content {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .badge {
+      padding: 5px 8px;
+      border-radius: 7px;
+      background: #eef4f5;
+      color: var(--blue-2);
+      font-size: 0.69rem;
+      font-weight: 900;
+      letter-spacing: 0.055em;
+      text-transform: uppercase;
+    }
+
+    .badge.hot { color: #8b3a18; background: #ffe1d3; }
+    .badge.award { color: #735500; background: #fff0b4; }
+    .badge.soon { color: #4f3a95; background: #e8e2ff; }
+
+    .book-card h3 {
+      margin-bottom: 3px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 1.34rem;
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+    }
+
+    .author {
+      margin-bottom: 11px;
+      color: var(--muted);
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+
+    .pitch {
+      margin-bottom: 12px;
+      color: #405566;
+      font-size: 0.9rem;
+      line-height: 1.45;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-bottom: 14px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 750;
+    }
+
+    .meta span::after { content: "·"; margin-left: 7px; }
+    .meta span:last-child::after { content: ""; margin: 0; }
+
+    .book-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      width: fit-content;
+      margin-top: auto;
+      padding: 9px 13px;
+      border-radius: 10px;
+      color: white;
+      background: var(--blue);
+      text-decoration: none;
+      font-size: 0.8rem;
+      font-weight: 850;
+    }
+
+    .book-link:hover { background: var(--blue-2); }
+
+    .empty {
+      grid-column: 1 / -1;
+      padding: 64px 24px;
+      border: 2px dashed #c9d6db;
+      border-radius: 24px;
+      color: var(--muted);
+      text-align: center;
+      background: rgba(255,255,255,.58);
+    }
+
+    .empty strong {
+      display: block;
+      margin-bottom: 7px;
+      color: var(--ink);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 1.3rem;
+    }
+
+    .trend-notes {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 20px;
+      margin: 68px 0 0;
+    }
+
+    .note-panel {
+      padding: 28px;
+      border-radius: 24px;
+    }
+
+    .note-panel:first-child { color: white; background: var(--blue); }
+    .note-panel:last-child { background: #ffe5d9; }
+
+    .note-panel h2 {
+      margin-bottom: 12px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(1.6rem, 4vw, 2.2rem);
+      letter-spacing: -0.03em;
+    }
+
+    .note-panel p { margin-bottom: 0; opacity: 0.88; }
+
+    .trend-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin: 20px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .trend-list li {
+      padding: 11px 12px;
+      border: 1px solid rgba(255,255,255,.17);
+      border-radius: 12px;
+      background: rgba(255,255,255,.08);
+      font-size: 0.88rem;
+      font-weight: 800;
+    }
+
+    .source-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 18px;
+    }
+
+    .source-link {
+      padding: 8px 10px;
+      border-radius: 9px;
+      color: #713719;
+      background: rgba(255,255,255,.56);
+      text-decoration: none;
+      font-size: 0.78rem;
+      font-weight: 850;
+    }
+
+    footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 28px 0 38px;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    @media (max-width: 940px) {
+      .hero { grid-template-columns: 1fr; padding-top: 45px; }
+      .trend-board { min-height: 300px; max-width: 560px; }
+      .trend-card:nth-child(3) { left: 34%; }
+      .book-grid { grid-template-columns: 1fr; }
+      .trend-notes { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 600px) {
+      .shell { width: min(100% - 24px, 1180px); }
+      header { min-height: 70px; }
+      .updated { font-size: 0; }
+      .updated::after { content: "Aug 2026"; font-size: 0.76rem; }
+      .hero { padding: 34px 0 38px; gap: 28px; }
+      h1 { font-size: clamp(3rem, 17vw, 4.6rem); }
+      .trend-board { min-height: 280px; }
+      .trend-card { width: 178px; min-height: 142px; padding: 16px; }
+      .trend-card:nth-child(1) { left: 0; }
+      .trend-card:nth-child(2) { top: 34px; }
+      .trend-card:nth-child(3) { left: 22%; }
+      .controls-wrap { top: 6px; padding: 11px; border-radius: 17px; }
+      .search-row { grid-template-columns: 1fr; gap: 6px; }
+      .result-count { text-align: left; padding-left: 4px; }
+      .book-card { grid-template-columns: 112px minmax(0, 1fr); gap: 14px; min-height: 278px; padding: 13px; border-radius: 18px; }
+      .cover-wrap { min-height: 177px; }
+      .book-card h3 { font-size: 1.16rem; }
+      .pitch { font-size: 0.83rem; }
+      .meta { gap: 4px; }
+      .meta span::after { margin-left: 4px; }
+      .trend-list { grid-template-columns: 1fr; }
+      .note-panel { padding: 22px; }
+      footer { flex-direction: column; gap: 6px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <a class="brand" href="#top" aria-label="Book Buzz home">
+        <span class="brand-mark" aria-hidden="true">B</span>
+        Book Buzz
+      </a>
+      <span class="updated">Fresh picks · Updated August 28, 2026</span>
+    </header>
+
+    <main id="top">
+      <section class="hero" aria-labelledby="hero-title">
+        <div>
+          <p class="eyebrow" id="audience-label">The age 11–13 reading radar</p>
+          <h1 id="hero-title">Find your next <span>great read.</span></h1>
+          <p class="hero-copy" id="audience-copy">Fresh mysteries, graphic memoirs, fantasy adventures, award winners, and honest stories about growing up.</p>
+        </div>
+
+        <div class="trend-board" aria-label="Popular reading trends">
+          <div class="trend-card"><small>Trend 01</small><b id="trend-one">Spooky mysteries are having a moment.</b></div>
+          <div class="trend-card"><small>Trend 02</small><b id="trend-two">Myths, monsters & big adventures.</b></div>
+          <div class="trend-card"><small>Trend 03</small><b id="trend-three">Real feelings. Bold new voices.</b></div>
+        </div>
+      </section>
+
+      <section aria-labelledby="books-heading">
+        <div class="controls-wrap">
+          <div class="age-picker">
+            <span class="age-label">Choose the reader’s age</span>
+            <div class="age-options" role="group" aria-label="Choose an age group">
+              <button class="age-option" type="button" data-age="1-3" aria-pressed="false">Ages 1–3</button>
+              <button class="age-option" type="button" data-age="4-7" aria-pressed="false">Ages 4–7</button>
+              <button class="age-option" type="button" data-age="8-10" aria-pressed="false">Ages 8–10</button>
+              <button class="age-option" type="button" data-age="11-13" aria-pressed="true">Ages 11–13</button>
+              <button class="age-option" type="button" data-age="14-17" aria-pressed="false">Ages 14–17</button>
+              <button class="age-option" type="button" data-age="18-25" aria-pressed="false">Ages 18–25</button>
+              <button class="age-option" type="button" data-age="26-39" aria-pressed="false">Ages 26–39</button>
+              <button class="age-option" type="button" data-age="40-60" aria-pressed="false">Ages 40–60</button>
+            </div>
+          </div>
+          <div class="search-row">
+            <label class="search-box">
+              <span class="visually-hidden" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;">Search books</span>
+              <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+              <input id="search" type="search" autocomplete="off" placeholder="Search a title, author, or mood…" />
+            </label>
+            <span class="result-count" id="result-count" aria-live="polite"></span>
+          </div>
+          <div class="filters" role="group" aria-label="Filter by reading style">
+            <button class="filter" type="button" data-filter="all" aria-pressed="true">All picks</button>
+            <button class="filter" type="button" data-filter="mystery" aria-pressed="false">Mystery</button>
+            <button class="filter" type="button" data-filter="fantasy" aria-pressed="false">Fantasy</button>
+            <button class="filter" type="button" data-filter="adventure" aria-pressed="false">Adventure</button>
+            <button class="filter" type="button" data-filter="funny" aria-pressed="false">Funny</button>
+            <button class="filter" type="button" data-filter="real-life" aria-pressed="false">Real life</button>
+            <button class="filter" type="button" data-filter="picture" aria-pressed="false">Picture books</button>
+            <button class="filter" type="button" data-filter="nonfiction" aria-pressed="false">Nonfiction</button>
+          </div>
+        </div>
+
+        <div class="section-heading">
+          <div>
+            <h2 id="books-heading">What’s buzzing now</h2>
+            <p id="selection-copy">Current picks for ages 11–13—not a numbered popularity ranking.</p>
+          </div>
+        </div>
+
+        <div class="book-grid" id="book-grid" aria-live="polite"></div>
+      </section>
+
+      <section class="trend-notes" aria-label="Reading trend notes and sources">
+        <div class="note-panel">
+          <h2>The big reading trends</h2>
+          <p>Readers are getting more choice in how stories are told, from touch-and-feel books to graphic memoirs, fantasy, thrillers, and big-idea nonfiction.</p>
+          <ul class="trend-list">
+            <li>Interactive early reading</li>
+            <li>Graphic storytelling</li>
+            <li>Cozy & spooky mysteries</li>
+            <li>Fantasy and romantasy</li>
+            <li>Book-club fiction</li>
+            <li>Big-idea nonfiction</li>
+          </ul>
+        </div>
+        <div class="note-panel">
+          <h2>How the list was made</h2>
+          <p>Books were chosen from current 2026 releases, awards, publisher guidance, and bestseller lists. Age ranges are helpful starting points, but interests and reading comfort matter too.</p>
+          <div class="source-list">
+            <a class="source-link" href="https://www.booktrust.org.uk/book-recommendations/best-new-books/" target="_blank" rel="noreferrer">BookTrust new books ↗</a>
+            <a class="source-link" href="https://www.ala.org/yalsa/best-fiction-young-adults" target="_blank" rel="noreferrer">ALA teen fiction ↗</a>
+            <a class="source-link" href="https://www.publishersweekly.com/pw/nielsen/index.html" target="_blank" rel="noreferrer">Current bestsellers ↗</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span>Made for curious readers from age 1 to 60.</span>
+      <span>Book details checked August 28, 2026.</span>
+    </footer>
+  </div>
+
+  <script>
+    const audiences = {
+      "1-3": {
+        label: "The age 1–3 story-time radar",
+        copy: "Bright board books, playful sounds, simple ideas, and pages made for sharing with a grown-up.",
+        trends: ["Touch-and-feel play.", "Big feelings in few words.", "Animals, sounds & opposites."]
+      },
+      "4-7": {
+        label: "The age 4–7 reading radar",
+        copy: "Funny picture books, read-aloud adventures, early facts, and stories that build confidence.",
+        trends: ["Laugh-out-loud read-alouds.", "Curious facts through stories.", "Bravery, bedtime & belonging."]
+      },
+      "8-10": {
+        label: "The age 8–10 reading radar",
+        copy: "Illustrated chapter books, mysteries, graphic stories, science adventures, and series worth following.",
+        trends: ["Fast, funny chapter books.", "Mystery and STEM adventures.", "Graphic storytelling grows."]
+      },
+      "11-13": {
+        label: "The age 11–13 reading radar",
+        copy: "Fresh mysteries, graphic memoirs, fantasy adventures, award winners, and honest stories about growing up.",
+        trends: ["Spooky mysteries are buzzing.", "Myths, monsters & quests.", "Real feelings. Bold voices."]
+      },
+      "14-17": {
+        label: "The age 14–17 reading radar",
+        copy: "Current young-adult fantasy, graphic novels, romance, identity stories, and high-stakes adventures.",
+        trends: ["Romantasy stays strong.", "Graphic novels widen the lens.", "Identity meets adventure."]
+      },
+      "18-25": {
+        label: "The age 18–25 reading radar",
+        copy: "BookTok favourites, twisty thrillers, fantasy series, and stories about becoming an adult.",
+        trends: ["BookTok drives discovery.", "Fantasy series keep growing.", "Thrillers move fast."]
+      },
+      "26-39": {
+        label: "The age 26–39 reading radar",
+        copy: "Fresh fiction, smart escapism, relationship stories, suspense, and books that spark conversation.",
+        trends: ["Atmospheric fiction.", "Book-club conversation starters.", "Escape with an edge."]
+      },
+      "40-60": {
+        label: "The age 40–60 reading radar",
+        copy: "Acclaimed fiction, gripping mysteries, history, memoir, and big-idea nonfiction from current lists.",
+        trends: ["Big-name literary returns.", "History meets the present.", "Smart mysteries endure."]
+      }
+    };
+
+    const books = [
+      { title: "Happy Dog, Sad Dog", author: "Sam Lloyd", ageGroup: "1-3", genres: ["picture", "funny"], badges: [{ label: "New 2026", kind: "hot" }, { label: "Opposites", kind: "" }], age: "Ages 1–3", pages: "Board book", format: "Read together", pitch: "Playful dogs help toddlers learn early describing words and emotional opposites.", cover: "", link: "https://www.booktrust.org.uk/book-recommendations/best-new-books/" },
+      { title: "This Little Caterpillar", author: "Ingela P. Arrhenius", ageGroup: "1-3", genres: ["picture", "adventure"], badges: [{ label: "New August 2026", kind: "hot" }, { label: "Touch & feel", kind: "" }], age: "Babies & toddlers", pages: "Board book", format: "Interactive", pitch: "A colourful caterpillar invites little readers to touch, explore, and engage their senses.", cover: "https://covers.openlibrary.org/b/isbn/9798887772608-L.jpg", link: "https://wildrumpusbooks.com/newboard" },
+      { title: "1, 2, 3 Salish Sea", author: "Nikki McClure", ageGroup: "1-3", genres: ["picture", "nonfiction"], badges: [{ label: "New release", kind: "hot" }, { label: "Counting", kind: "" }], age: "Ages 0–3", pages: "Board book", format: "Nature + numbers", pitch: "A gentle counting journey through the animals and landscapes of the Salish Sea.", cover: "", link: "https://www.penguinrandomhouse.com/books/new-releases-board-books-childrens/" },
+
+      { title: "Mission: Bedtime", author: "Tracey Corderoy & Alex Patrick", ageGroup: "4-7", genres: ["picture", "funny", "adventure"], badges: [{ label: "New 2026", kind: "hot" }, { label: "Bedtime fun", kind: "" }], age: "Ages 3–5+", pages: "Picture book", format: "Read aloud", pitch: "Kit tackles a string of hilarious family challenges before one final book saves bedtime.", cover: "", link: "https://www.booktrust.org.uk/book-recommendations/best-new-books/" },
+      { title: "I, Rock", author: "Eoin McLaughlin & Mark Chambers", ageGroup: "4-7", genres: ["picture", "funny", "nonfiction"], badges: [{ label: "New 2026", kind: "hot" }, { label: "Funny science", kind: "" }], age: "Ages 3–7", pages: "Picture book", format: "Story + facts", pitch: "A very old rock worries no one will attend its three-billionth birthday in this funny geology tale.", cover: "", link: "https://www.booktrust.org.uk/book-recommendations/best-new-books/" },
+      { title: "The Skeleton and the Cat", author: "Brandon James Scott", ageGroup: "4-7", genres: ["picture", "funny", "mystery"], badges: [{ label: "Fresh picture book", kind: "hot" }, { label: "Cute & spooky", kind: "" }], age: "Ages 3–7", pages: "Picture book", format: "Read aloud", pitch: "A playful gothic story for children who like their monsters funny and their bedtime dramatic.", cover: "", link: "https://bookshop.org/lists/new-releases-best-new-picture-books-for-ages-3-7" },
+
+      { title: "Green Jolene and the Neighborhood Swap", author: "Wendy Mass", ageGroup: "8-10", genres: ["real-life", "adventure"], badges: [{ label: "New 2026", kind: "hot" }, { label: "Eco adventure", kind: "" }], age: "Ages 7–10", pages: "Chapter book", format: "Illustrated", pitch: "A climate-conscious young hero brings neighbours together through a clever community swap.", cover: "https://covers.openlibrary.org/b/isbn/9781368116060-L.jpg", link: "https://bookculture.com/booklist/new-chapter-books" },
+      { title: "Rayana Johnson’s Giant Leap", author: "Jill Tew", ageGroup: "8-10", genres: ["real-life", "adventure"], badges: [{ label: "New 2026", kind: "hot" }, { label: "STEM adventure", kind: "" }], age: "Ages 8–12", pages: "288 pages", format: "Novel", pitch: "Space camp, huge dreams, and real middle-school worries collide in a story full of science and heart.", cover: "https://covers.openlibrary.org/b/isbn/9781368104760-L.jpg", link: "https://books.disney.com/book/rayana-johnsons-giant-leap/" },
+      { title: "Ghost in the Night", author: "Tiffany D. Jackson", ageGroup: "8-10", genres: ["mystery", "adventure"], badges: [{ label: "New August 2026", kind: "hot" }, { label: "Spooky mystery", kind: "" }], age: "Ages 9–12", pages: "288 pages", format: "Novel", pitch: "A ghost-loving kid, a haunted Savannah tour, and one photograph that may reveal too much.", cover: "https://covers.openlibrary.org/b/isbn/9798225017477-L.jpg", link: "https://unitedstatesofreaders.scholastic.com/ghost-in-the-night/9798225091842-rco-us.html" },
+      { title: "A Sea of Lemon Trees", author: "María Dolores Águila", ageGroup: "8-10", genres: ["real-life", "nonfiction"], badges: [{ label: "2026 Newbery Honor", kind: "award" }, { label: "Verse novel", kind: "" }], age: "Ages 8–12", pages: "304 pages", format: "Historical verse", pitch: "A young student and his community challenge school segregation in a story based on real events.", cover: "https://covers.openlibrary.org/b/isbn/9781250342614-L.jpg", link: "https://us.macmillan.com/books/9781250342614/aseaoflemontrees/" },
+
+      { title: "All the Blues in the Sky", author: "Renée Watson", ageGroup: "11-13", genres: ["real-life"], badges: [{ label: "2026 Newbery Medal", kind: "award" }, { label: "Verse novel", kind: "" }], age: "Ages 10–14", pages: "208 pages", format: "Verse + prose", pitch: "A powerful, hopeful story about friendship, grief, and finding people who help you move forward.", cover: "https://covers.openlibrary.org/b/isbn/9781547605897-L.jpg", link: "https://www.publishersweekly.com/9781547605897" },
+      { title: "The Moon Without Stars", author: "Chanel Miller", ageGroup: "11-13", genres: ["real-life"], badges: [{ label: "New 2026", kind: "hot" }, { label: "Middle-school life", kind: "" }], age: "Grade 6+", pages: "256 pages", format: "Novel", pitch: "A quiet seventh grader’s zine becomes popular, testing friendship, identity, and belonging.", cover: "https://covers.openlibrary.org/b/isbn/9780593624555-L.jpg", link: "https://www.penguinrandomhouse.com/books/735879/the-moon-without-stars-by-chanel-miller/" },
+      { title: "Mexikid Dreams", author: "Pedro Martín", ageGroup: "11-13", genres: ["real-life", "adventure"], badges: [{ label: "Coming September 2026", kind: "soon" }, { label: "Graphic memoir", kind: "" }], age: "Ages 10–14", pages: "320 pages", format: "Graphic memoir", pitch: "The award-winning Mexikid story continues with family, travel, culture, jokes, and adventure.", cover: "https://covers.openlibrary.org/b/isbn/9798217002481-L.jpg", link: "https://www.penguinrandomhouse.com/books/774495/mexikid-dreams-a-graphic-memoir-by-pedro-martin/" },
+      { title: "The Wild Zone", author: "Rick Riordan & Annabelle Oh", ageGroup: "11-13", genres: ["fantasy", "adventure"], badges: [{ label: "Coming September 2026", kind: "soon" }, { label: "Percy Jackson world", kind: "" }], age: "Ages 10–14", pages: "320 pages", format: "Fantasy novel", pitch: "Five new demigods enter a forbidden part of Camp Half-Blood and wake monsters and curses.", cover: "https://covers.openlibrary.org/b/isbn/9798217445981-L.jpg", link: "https://www.penguinrandomhouse.com/books/837349/camp-half-blood-from-the-world-of-percy-jackson-the-wild-zone-by-rick-riordan-and-annabelle-oh/" },
+
+      { title: "Maybe Tomorrow I’ll Know", author: "Alex Ritany", ageGroup: "14-17", genres: ["fantasy", "real-life", "mystery"], badges: [{ label: "New 2026", kind: "hot" }, { label: "Time loop", kind: "" }], age: "Young adult", pages: "Novel", format: "Romance + mystery", pitch: "A teen wakes in an unfamiliar body and a repeating day in this heartfelt, funny mystery.", cover: "https://covers.openlibrary.org/b/isbn/9781324083634-L.jpg", link: "https://www.regulatorbookshop.com/list/some-favorite-new-young-adult-books" },
+      { title: "The Last Best Quest Ever", author: "F. T. Lukens", ageGroup: "14-17", genres: ["fantasy", "adventure", "funny"], badges: [{ label: "New May 2026", kind: "hot" }, { label: "Romantasy", kind: "" }], age: "Young adult", pages: "Novel", format: "Fantasy quest", pitch: "A fraudulent teen quester joins a royal rival on a witty, dangerous mission to save her brother.", cover: "https://covers.openlibrary.org/b/isbn/9781665950978-L.jpg", link: "https://www.regulatorbookshop.com/list/some-favorite-new-young-adult-books" },
+      { title: "A Smile Like Yours", author: "Emily Thomas", ageGroup: "14-17", genres: ["real-life"], badges: [{ label: "New June 2026", kind: "hot" }, { label: "Graphic romance", kind: "" }], age: "Older teen", pages: "Graphic novel", format: "First love", pitch: "A sweet story about first love and beginning university while living with face blindness.", cover: "https://covers.openlibrary.org/b/isbn/9781525311451-L.jpg", link: "https://www.regulatorbookshop.com/list/some-favorite-new-young-adult-books" },
+
+      { title: "Fruit Fly", author: "Josh Silver", ageGroup: "18-25", genres: ["real-life", "mystery"], badges: [{ label: "Popular August 2026", kind: "hot" }, { label: "New fiction", kind: "" }], age: "Adult", pages: "Novel", format: "Contemporary", pitch: "One of August’s most-followed new releases for readers looking for sharp contemporary fiction.", cover: "", link: "https://www.goodreads.com/book/popular_by_date/2026/8" },
+      { title: "Adversary to the Villain", author: "Hannah Nicole Maehrer", ageGroup: "18-25", genres: ["fantasy", "funny", "adventure"], badges: [{ label: "Trending August 2026", kind: "hot" }, { label: "Fantasy series", kind: "" }], age: "Adult", pages: "Novel", format: "Fantasy romance", pitch: "The viral fantasy series continues with villains, workplace comedy, romance, and high-stakes adventure.", cover: "", link: "https://www.goodreads.com/book/popular_by_date/2026/8" },
+      { title: "The Unknown", author: "Riley Sager", ageGroup: "18-25", genres: ["mystery"], badges: [{ label: "Popular August 2026", kind: "hot" }, { label: "Thriller", kind: "" }], age: "Adult", pages: "Novel", format: "Suspense", pitch: "A fast-moving new thriller for readers who love secrets, twists, and one-more-chapter momentum.", cover: "", link: "https://www.goodreads.com/book/popular_by_date/2026/8" },
+
+      { title: "Sunrise", author: "Téa Obreht", ageGroup: "26-39", genres: ["mystery", "real-life"], badges: [{ label: "National bestseller", kind: "award" }, { label: "New August 2026", kind: "hot" }], age: "Adult", pages: "Novel", format: "Literary mystery", pitch: "Three lives, a century, and a ghost town connect in a haunting story about the secrets of one place.", cover: "https://covers.openlibrary.org/b/isbn/9781984855534-L.jpg", link: "https://flyleafbooks.com/preorder-aug2026" },
+      { title: "The Seekers of Deer Creek", author: "Thao Thai", ageGroup: "26-39", genres: ["real-life", "mystery"], badges: [{ label: "New August 2026", kind: "hot" }, { label: "Book-club fiction", kind: "" }], age: "Adult", pages: "Novel", format: "Contemporary fiction", pitch: "A fresh, atmospheric novel for readers who enjoy family stories, secrets, and layered characters.", cover: "", link: "https://bookshop.org/lists/august-2026-fiction-releases" },
+      { title: "When Lemons Give You Life", author: "Anna Johnston", ageGroup: "26-39", genres: ["real-life", "funny"], badges: [{ label: "New August 2026", kind: "hot" }, { label: "Uplifting fiction", kind: "" }], age: "Adult", pages: "Novel", format: "Contemporary", pitch: "A warm new release for readers seeking humour, heart, and an optimistic escape.", cover: "", link: "https://bookshop.org/lists/august-2026-fiction-releases" },
+
+      { title: "Whistler", author: "Ann Patchett", ageGroup: "40-60", genres: ["real-life"], badges: [{ label: "Current bestseller", kind: "award" }, { label: "Literary fiction", kind: "" }], age: "Adult", pages: "Novel", format: "Literary fiction", pitch: "A major new release from an acclaimed novelist, now high on current hardcover fiction lists.", cover: "", link: "https://www.publishersweekly.com/pw/nielsen/index.html" },
+      { title: "The Calamity Club", author: "Kathryn Stockett", ageGroup: "40-60", genres: ["real-life", "mystery"], badges: [{ label: "Current bestseller", kind: "award" }, { label: "New fiction", kind: "hot" }], age: "Adult", pages: "Novel", format: "Book-club fiction", pitch: "A high-profile new novel drawing readers who enjoy character-rich stories and lively discussion.", cover: "", link: "https://www.publishersweekly.com/pw/nielsen/index.html" },
+      { title: "The Rise and Fall of the Artificial State", author: "Jill Lepore", ageGroup: "40-60", genres: ["nonfiction"], badges: [{ label: "Best of 2026 pick", kind: "award" }, { label: "Big ideas", kind: "" }], age: "Adult", pages: "Nonfiction", format: "History + technology", pitch: "A sweeping look at how data, machines, and artificial intelligence are reshaping political life.", cover: "", link: "https://www.newyorker.com/best-books-2026" }
+    ];
+
+    const grid = document.querySelector("#book-grid");
+    const search = document.querySelector("#search");
+    const count = document.querySelector("#result-count");
+    const audienceLabel = document.querySelector("#audience-label");
+    const audienceCopy = document.querySelector("#audience-copy");
+    const selectionCopy = document.querySelector("#selection-copy");
+    const trendItems = [document.querySelector("#trend-one"), document.querySelector("#trend-two"), document.querySelector("#trend-three")];
+    const ageButtons = [...document.querySelectorAll(".age-option")];
+    const filterButtons = [...document.querySelectorAll(".filter")];
+    let activeAge = "11-13";
+    let activeFilter = "all";
+
+    const escapeHtml = (value) => value.replace(/[&<>'"]/g, character => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;"
+    })[character]);
+
+    function bookCard(book) {
+      const badges = book.badges.map(badge => `<span class="badge ${badge.kind}">${escapeHtml(badge.label)}</span>`).join("");
+      const searchableGenres = book.genres.map(escapeHtml).join(" ");
+      const cover = book.cover
+        ? `<img src="${book.cover}" alt="Cover of ${escapeHtml(book.title)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" /><div class="cover-fallback">${escapeHtml(book.title)}</div>`
+        : `<div class="cover-fallback" style="display:flex">${escapeHtml(book.title)}</div>`;
+
+      return `
+        <article class="book-card" data-genres="${searchableGenres}">
+          <div class="cover-wrap">${cover}</div>
+          <div class="book-content">
+            <div class="badge-row">${badges}</div>
+            <h3>${escapeHtml(book.title)}</h3>
+            <p class="author">by ${escapeHtml(book.author)}</p>
+            <p class="pitch">${escapeHtml(book.pitch)}</p>
+            <div class="meta"><span>${escapeHtml(book.age)}</span><span>${escapeHtml(book.pages)}</span><span>${escapeHtml(book.format)}</span></div>
+            <a class="book-link" href="${book.link}" target="_blank" rel="noreferrer" aria-label="Learn more about ${escapeHtml(book.title)}">Book details <span aria-hidden="true">↗</span></a>
+          </div>
+        </article>`;
+    }
+
+    function render() {
+      const query = search.value.trim().toLowerCase();
+      const visible = books.filter(book => {
+        const matchesAge = book.ageGroup === activeAge;
+        const matchesFilter = activeFilter === "all" || book.genres.includes(activeFilter);
+        const haystack = [book.title, book.author, book.pitch, book.format, ...book.genres].join(" ").toLowerCase();
+        return matchesAge && matchesFilter && haystack.includes(query);
+      });
+
+      count.textContent = `${visible.length} ${visible.length === 1 ? "book" : "books"}`;
+      grid.innerHTML = visible.length
+        ? visible.map(bookCard).join("")
+        : `<div class="empty"><strong>No book matches yet.</strong>Try a different word or choose “All picks.”</div>`;
+    }
+
+    function updateAudience() {
+      const audience = audiences[activeAge];
+      audienceLabel.textContent = audience.label;
+      audienceCopy.textContent = audience.copy;
+      selectionCopy.textContent = `Current picks for ages ${activeAge.replace("-", "–")}—not a numbered popularity ranking.`;
+      trendItems.forEach((item, index) => { item.textContent = audience.trends[index]; });
+    }
+
+    ageButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        activeAge = button.dataset.age;
+        activeFilter = "all";
+        search.value = "";
+        ageButtons.forEach(item => item.setAttribute("aria-pressed", String(item === button)));
+        filterButtons.forEach(item => item.setAttribute("aria-pressed", String(item.dataset.filter === "all")));
+        updateAudience();
+        render();
+      });
+    });
+
+    filterButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        activeFilter = button.dataset.filter;
+        filterButtons.forEach(item => item.setAttribute("aria-pressed", String(item === button)));
+        render();
+      });
+    });
+
+    search.addEventListener("input", render);
+    updateAudience();
+    render();
+  </script>
+</body>
+</html>

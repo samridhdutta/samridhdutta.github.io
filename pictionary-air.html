@@ -103,13 +103,13 @@
       if(state.role!=='draw')return;
       setModeUI('air');
       if(state.handTracking)return;
-      if(!navigator.mediaDevices?.getUserMedia){setModeUI('touch');setNote('Camera access is unavailable, so Touch mode is on.');return}
+      if(!navigator.mediaDevices?.getUserMedia){setModeUI('air');setNote('Air mode needs camera access on this device.');$('hint').textContent='Air is still selected. Tap Air to try again.';return}
       try{
         $('hint').textContent='Allow camera access, then show your index finger.';
         const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:1280},height:{ideal:720}},audio:false});
         state.cameraStream=stream;$('camera').srcObject=stream;await $('camera').play();$('camera').classList.remove('hidden');$('stage').classList.add('camera-on');$('handStatus').classList.remove('hidden');$('handStatus').textContent='Loading finger tracking…';
         await loadHandTracker();state.handTracking=true;state.lastVideoTime=-1;$('handStatus').textContent='☝ Show your finger';$('hint').textContent='Move your index finger in front of the camera.';trackFinger();
-      }catch(e){stopCamera();setModeUI('touch');setNote('Camera could not start, so Touch mode is on. Check camera permission and try Air again.')}
+      }catch(e){stopCamera();setModeUI('air');setNote('Camera or finger tracking could not start. Air mode is still selected.');$('hint').textContent='Check camera permission, then tap Air to try again.'}
     }
     function trackFinger(){
       if(!state.handTracking)return;

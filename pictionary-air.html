@@ -95,8 +95,8 @@
     function setModeUI(mode){state.mode=mode;$('airBtn').classList.toggle('active',mode==='air');$('touchBtn').classList.toggle('active',mode==='touch');canvas.classList.toggle('touch',mode==='touch');if(mode==='touch'){$('cursor').classList.add('hidden');$('handStatus').classList.add('hidden');$('hint').textContent='Draw on the canvas with your finger.'}else{$('hint').textContent=state.handTracking?'Move your index finger in front of the camera.':'Press Air to turn on finger tracking.'}}
     async function loadHandTracker(){
       if(state.handLandmarker)return;
-      const vision=await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/+esm');
-      const files=await vision.FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/wasm');
+      const vision=await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/+esm');
+      const files=await vision.FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/wasm');
       state.handLandmarker=await vision.HandLandmarker.createFromOptions(files,{baseOptions:{modelAssetPath:'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task'},runningMode:'VIDEO',numHands:1,minHandDetectionConfidence:.55,minHandPresenceConfidence:.55,minTrackingConfidence:.5});
     }
     async function startAir(){
@@ -105,11 +105,16 @@
       if(state.handTracking)return;
       if(!navigator.mediaDevices?.getUserMedia){setModeUI('air');setNote('Air mode needs camera access on this device.');$('hint').textContent='Air is still selected. Tap Air to try again.';return}
       try{
-        $('hint').textContent='Allow camera access, then show your index finger.';
-        const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:1280},height:{ideal:720}},audio:false});
-        state.cameraStream=stream;$('camera').srcObject=stream;await $('camera').play();$('camera').classList.remove('hidden');$('stage').classList.add('camera-on');$('handStatus').classList.remove('hidden');$('handStatus').textContent='Loading finger tracking…';
+        if(!state.cameraStream){
+          $('hint').textContent='Allow camera access, then show your index finger.';
+          const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:1280},height:{ideal:720}},audio:false});
+          state.cameraStream=stream;$('camera').srcObject=stream;await $('camera').play();$('camera').classList.remove('hidden');$('stage').classList.add('camera-on');
+        }
+      }catch(e){stopCamera();setModeUI('air');setNote('Camera could not start. Air mode is still selected.');$('hint').textContent='Check camera permission, then tap Air to try again.';return}
+      $('handStatus').classList.remove('hidden');$('handStatus').textContent='Loading finger tracking…';
+      try{
         await loadHandTracker();state.handTracking=true;state.lastVideoTime=-1;$('handStatus').textContent='☝ Show your finger';$('hint').textContent='Move your index finger in front of the camera.';trackFinger();
-      }catch(e){stopCamera();setModeUI('air');setNote('Camera or finger tracking could not start. Air mode is still selected.');$('hint').textContent='Check camera permission, then tap Air to try again.'}
+      }catch(e){state.handTracking=false;$('handStatus').textContent='Finger tracking unavailable';$('handStatus').classList.remove('tracking');setNote('The camera will stay on. Tap Air to retry finger tracking.');$('hint').textContent='Camera is on — tap Air to retry finger tracking.'}
     }
     function trackFinger(){
       if(!state.handTracking)return;

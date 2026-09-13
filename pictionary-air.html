@@ -32,10 +32,10 @@
     <section class="hero">
       <p class="kicker">◉ &nbsp; TWO-DEVICE PARTY GAME</p>
       <h1>Draw in the air.<br><em>Watch it appear.</em></h1>
-      <p class="intro">Use one phone as the magic marker and any second screen as the live canvas. No download needed.</p>
+      <p class="intro">Use one phone as the magic marker and watch the drawing appear live on every connected screen. No download needed.</p>
       <div class="choices">
         <article class="draw-card"><b>01</b><div class="big-icon">✎</div><h2>I’ll draw</h2><p>Create a room on the phone you will move or draw on.</p><button id="createBtn" class="btn" disabled>Create a room →</button></article>
-        <article><b>02</b><div class="big-icon">👁</div><h2>I’ll watch</h2><p>Enter the six-digit room code from the drawing phone.</p><div class="otp"><input id="joinCode" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="••••••" aria-label="Six-digit room code"></div><button id="joinBtn" class="btn" disabled>Join room →</button></article>
+        <article><b>02</b><div class="big-icon">👁</div><h2>I’ll watch</h2><p>Enter the same six-digit room code on every watching screen.</p><div class="otp"><input id="joinCode" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="••••••" aria-label="Six-digit room code"></div><button id="joinBtn" class="btn" disabled>Join room →</button></article>
       </div>
       <p id="lobbyNote" class="note">Choose a role to begin.</p>
     </section>
@@ -53,7 +53,7 @@
             <div class="actions"><button id="undoBtn" class="btn">↶ Undo</button><button id="clearBtn" class="btn">× Clear</button></div>
           </div>
         </div>
-        <div id="watchPanel" class="watch hidden"><div class="eye">👁</div><small>YOU ARE WATCHING</small><strong>Shout out your guess!</strong><p>The drawing appears here live.</p></div>
+        <div id="watchPanel" class="watch hidden"><div class="eye">👁</div><small>YOU ARE WATCHING</small><strong>Shout out your guess!</strong><p>Every connected screen sees the same live drawing.</p></div>
       </aside>
       <section class="stage-wrap">
         <div id="stage" class="stage"><video id="camera" class="camera hidden" playsinline muted></video><div class="grid"></div><canvas id="canvas"></canvas><i id="cursor" class="cursor hidden"></i><div id="cover" class="cover"><div class="radio">◉</div><h2 id="coverTitle">Waiting for remote</h2><p id="coverNote"></p><button id="retryBtn" class="btn hidden">Try again</button></div></div>
@@ -68,7 +68,7 @@
     const WORDS=['Rocket ship','Dancing penguin','Birthday cake','Sleeping cat','Hot-air balloon','Robot chef','Treasure chest','Flying pizza','Surfing dinosaur','Haunted house','Superhero','Giant octopus'];
     const COLORS=['#171629','#ff4f64','#2b59ff','#00a896','#ff9f1c','#ffffff'];
     const $=id=>document.getElementById(id), clamp=n=>Math.max(0,Math.min(1,n));
-    const state={role:null,room:'',status:'loading',mode:'air',color:COLORS[0],width:7,ends:0,peer:null,conn:null,strokes:[],active:null,drawing:false,cursor:{x:.5,y:.5},cameraStream:null,handLandmarker:null,handTracking:false,handFrame:0,lastVideoTime:-1,fingerVisible:false};
+    const state={role:null,room:'',status:'loading',mode:'air',color:COLORS[0],width:7,ends:0,peer:null,conns:[],strokes:[],active:null,drawing:false,cursor:{x:.5,y:.5},cameraStream:null,handLandmarker:null,handTracking:false,handFrame:0,lastVideoTime:-1,fingerVisible:false};
     const canvas=$('canvas'),ctx=canvas.getContext('2d');
     function ready(){return typeof window.Peer==='function'}
     function setReady(){const ok=ready();$('createBtn').disabled=!ok;$('readyBadge').className='net '+(ok?'on':'bad');$('readyBadge').innerHTML=(ok?'● ':'× ')+'<span class="net-text">'+(ok?'Remote ready':'Remote unavailable')+'</span>';validateJoin()}
@@ -80,10 +80,29 @@
     function setNote(text){$('lobbyNote').textContent=text;$('coverNote').textContent=text}
     function setStatus(status,note){state.status=status;setNote(note);const connected=status==='connected';$('statusBadge').className='net '+(connected?'on':status==='error'?'bad':'');$('statusBadge').innerHTML='<span>'+(connected?'●':'○')+'</span><span class="net-text">'+status+'</span>';$('cover').classList.toggle('hidden',connected);$('coverTitle').textContent=status==='error'?'Connection paused':state.role==='draw'?'Waiting for remote':'Connecting…';$('retryBtn').classList.toggle('hidden',status!=='error')}
     function showGame(){ $('lobby').classList.add('hidden');$('game').classList.remove('hidden');$('roomCode').textContent=state.room;$('drawPanel').classList.toggle('hidden',state.role!=='draw');$('watchPanel').classList.toggle('hidden',state.role!=='watch');$('shareIcon').classList.toggle('hidden',state.role!=='draw');$('timerBtn').classList.toggle('hidden',state.role!=='draw');setTimeout(redraw,40)}
-    function send(msg){if(state.conn&&state.conn.open)state.conn.send(msg)}
-    function attach(conn){state.conn=conn;conn.on('open',()=>setStatus('connected','Remote connected — ready to play!'));conn.on('data',receive);conn.on('close',()=>setStatus('error','Remote disconnected. Return home and reconnect.'));conn.on('error',()=>setStatus('error','Connection interrupted. Try again.'))}
-    function receive(m){if(!m||!m.type)return;if(m.type==='begin')state.strokes.push(m.stroke);if(m.type==='point'){const s=state.strokes.find(x=>x.id===m.id);if(s)s.points.push(m.point)}if(m.type==='undo')state.strokes.pop();if(m.type==='clear')state.strokes=[];if(m.type==='timer'){state.ends=m.ends;startClock()}redraw()}
-    $('createBtn').onclick=()=>{if(!ready())return;state.role='draw';state.room=randomCode();$('secretWord').textContent=randomWord();showGame();setStatus('waiting','Enter this code on the watching device.');state.peer=new Peer(PREFIX+state.room);state.peer.on('connection',attach);state.peer.on('error',()=>setStatus('error','Could not open the room. Try again.'))};
+    function send(msg){state.conns.filter(c=>c.open).forEach(c=>{try{c.send(msg)}catch(e){}})}
+    function openScreenCount(){return state.conns.filter(c=>c.open).length}
+    function updateConnectionStatus(){
+      const count=openScreenCount();
+      if(state.role==='draw'){
+        if(count){setStatus('connected',count+(count===1?' screen connected — ready to play!':' screens connected — drawing is live everywhere!'));$('statusBadge').querySelector('.net-text').textContent=count+(count===1?' screen':' screens')}
+        else setStatus('waiting','Enter this code on every watching screen.');
+      }
+    }
+    function attach(conn){
+      if(!state.conns.includes(conn))state.conns.push(conn);
+      conn.on('open',()=>{
+        if(state.role==='draw'){
+          try{conn.send({type:'sync',strokes:state.strokes,ends:state.ends})}catch(e){}
+          updateConnectionStatus();
+        }else setStatus('connected','Connected — the drawing will appear here live!');
+      });
+      conn.on('data',receive);
+      conn.on('close',()=>{state.conns=state.conns.filter(c=>c!==conn);if(state.role==='draw')updateConnectionStatus();else setStatus('error','Drawing device disconnected. Return home and reconnect.')});
+      conn.on('error',()=>{state.conns=state.conns.filter(c=>c!==conn);if(state.role==='draw')updateConnectionStatus();else setStatus('error','Connection interrupted. Try again.')});
+    }
+    function receive(m){if(!m||!m.type)return;if(m.type==='sync'){state.strokes=Array.isArray(m.strokes)?m.strokes:[];state.ends=m.ends||0;if(state.ends)startClock()}if(m.type==='begin')state.strokes.push(m.stroke);if(m.type==='point'){const s=state.strokes.find(x=>x.id===m.id);if(s)s.points.push(m.point)}if(m.type==='undo')state.strokes.pop();if(m.type==='clear')state.strokes=[];if(m.type==='timer'){state.ends=m.ends;startClock()}redraw()}
+    $('createBtn').onclick=()=>{if(!ready())return;state.role='draw';state.room=randomCode();$('secretWord').textContent=randomWord();showGame();setStatus('waiting','Enter this code on every watching screen.');state.peer=new Peer(PREFIX+state.room);state.peer.on('connection',attach);state.peer.on('error',()=>setStatus('error','Could not open the room. Try again.'))};
     $('joinBtn').onclick=()=>{if(!ready()||$('joinCode').value.length!==6)return;state.role='watch';state.room=$('joinCode').value;showGame();setStatus('joining','Finding the drawing phone…');state.peer=new Peer();state.peer.on('open',()=>attach(state.peer.connect(PREFIX+state.room,{reliable:true})));state.peer.on('error',()=>setStatus('error','Room not found. Check the code and try again.'))};
     function redraw(){const r=canvas.getBoundingClientRect(),d=Math.min(window.devicePixelRatio||1,2);canvas.width=Math.round(r.width*d);canvas.height=Math.round(r.height*d);ctx.setTransform(d,0,0,d,0,0);ctx.clearRect(0,0,r.width,r.height);ctx.lineCap='round';ctx.lineJoin='round';state.strokes.forEach(s=>{if(!s.points.length)return;ctx.beginPath();ctx.strokeStyle=s.color;ctx.lineWidth=s.width;ctx.moveTo(s.points[0].x*r.width,s.points[0].y*r.height);s.points.slice(1).forEach(p=>ctx.lineTo(p.x*r.width,p.y*r.height));ctx.stroke()})}
     window.addEventListener('resize',redraw);
@@ -141,7 +160,7 @@
     function clear(){state.strokes=[];send({type:'clear'});redraw()}$('clearBtn').onclick=clear;$('undoBtn').onclick=()=>{state.strokes.pop();send({type:'undo'});redraw()};$('newWordBtn').onclick=()=>{$('secretWord').textContent=randomWord();clear();state.ends=0;updateClock(90)};
     let clockTimer;function updateClock(left){$('clock').textContent=Math.floor(left/60)+':'+String(left%60).padStart(2,'0')}function startClock(){clearInterval(clockTimer);const tick=()=>updateClock(Math.max(0,Math.ceil((state.ends-Date.now())/1000)));tick();clockTimer=setInterval(tick,250)}$('timerBtn').onclick=()=>{state.ends=Date.now()+90000;send({type:'timer',ends:state.ends});startClock()};
     $('roomBtn').onclick=async()=>{if(state.role!=='draw')return;const text='Join my Pictionary Air room: '+state.room;try{if(navigator.share)await navigator.share({title:'Pictionary Air',text,url:location.href});else{await navigator.clipboard.writeText(text+' '+location.href);setNote('Room code and link copied!')}}catch(e){}};
-    function home(){stopCamera();if(state.conn)state.conn.close();if(state.peer)state.peer.destroy();clearInterval(clockTimer);Object.assign(state,{role:null,room:'',status:'loading',mode:'air',ends:0,peer:null,conn:null,strokes:[],active:null,drawing:false,cursor:{x:.5,y:.5}});setModeUI('air');$('joinCode').value='';$('game').classList.add('hidden');$('lobby').classList.remove('hidden');$('lobbyNote').textContent='Choose a role to begin.';validateJoin();redraw()}
+    function home(){stopCamera();state.conns.forEach(c=>{try{c.close()}catch(e){}});if(state.peer)state.peer.destroy();clearInterval(clockTimer);Object.assign(state,{role:null,room:'',status:'loading',mode:'air',ends:0,peer:null,conns:[],strokes:[],active:null,drawing:false,cursor:{x:.5,y:.5}});setModeUI('air');$('joinCode').value='';$('game').classList.add('hidden');$('lobby').classList.remove('hidden');$('lobbyNote').textContent='Choose a role to begin.';validateJoin();redraw()}
     $('homeBtn').onclick=home;$('retryBtn').onclick=home;window.addEventListener('beforeunload',()=>{if(state.peer)state.peer.destroy()});
   })();
   </script>

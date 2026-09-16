@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#171a2d" />
+  <title>Ludo Party</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">A classic game for the whole family</p>
+        <h1>Ludo <span>Party</span></h1>
+      </div>
+      <button id="new-game" class="secondary-btn" type="button">↻ New game</button>
+    </header>
+
+    <section class="game-layout" aria-label="Ludo game">
+      <div class="board-wrap">
+        <div id="board" class="board" role="grid" aria-label="Ludo board"></div>
+      </div>
+
+      <aside class="game-panel">
+        <section id="setup-card" class="panel-card setup-card">
+          <p class="card-kicker">Game setup</p>
+          <h2>Who’s playing?</h2>
+          <div class="player-count" role="group" aria-label="Number of players">
+            <button type="button" data-count="2">2</button>
+            <button type="button" data-count="3">3</button>
+            <button class="active" type="button" data-count="4">4</button>
+          </div>
+          <div id="name-fields" class="name-fields"></div>
+          <button id="start-game" class="primary-btn" type="button">Start the party</button>
+        </section>
+
+        <section id="play-card" class="panel-card play-card hidden" aria-live="polite">
+          <p class="card-kicker">Current turn</p>
+          <div class="turn-heading">
+            <span id="turn-dot" class="turn-dot"></span>
+            <div>
+              <h2 id="turn-name">Red</h2>
+              <p id="status-text">Roll the dice to begin.</p>
+            </div>
+          </div>
+
+          <div class="dice-stage">
+            <div id="dice" class="dice" aria-label="Dice not rolled">●</div>
+            <button id="roll-dice" class="primary-btn roll-btn" type="button">Roll dice</button>
+          </div>
+
+          <div id="player-list" class="player-list"></div>
+        </section>
+
+        <details class="panel-card rules-card">
+          <summary>How to play</summary>
+          <ul>
+            <li>Roll a 6 to bring a piece onto the board.</li>
+            <li>Click a glowing piece to move it.</li>
+            <li>Landing on a rival sends it back to base.</li>
+            <li>Roll a 6 or capture a piece to play again.</li>
+            <li>Bring all four pieces home to win.</li>
+          </ul>
+        </details>
+      </aside>
+    </section>
+  </main>
+
+  <div id="celebration" class="celebration hidden" role="dialog" aria-modal="true" aria-labelledby="winner-title">
+    <div class="winner-card">
+      <div class="trophy">🏆</div>
+      <p class="card-kicker">We have a winner!</p>
+      <h2 id="winner-title">Red wins!</h2>
+      <p>What a game. Ready for another round?</p>
+      <button id="play-again" class="primary-btn" type="button">Play again</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

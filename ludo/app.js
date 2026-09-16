@@ -40,6 +40,8 @@ const lobbyPlayersEl = document.querySelector("#lobby-players");
 const lobbyStatus = document.querySelector("#lobby-status");
 const onlineStart = document.querySelector("#online-start");
 const connectionError = document.querySelector("#connection-error");
+const createRoomButton = document.querySelector("#create-room");
+const joinRoomButton = document.querySelector("#join-room");
 
 let selectedCount = 4;
 let players = [];
@@ -356,19 +358,48 @@ function renderLobby() {
 function createRoom() {
   connectionError.textContent = "";
   if (typeof Peer === "undefined") return connectionError.textContent = "Online service did not load. Check your internet and try again.";
+  if (!navigator.onLine) return connectionError.textContent = "You appear to be offline. Connect to the internet and try again.";
   closeNetwork();
+  createRoomButton.disabled = true;
+  createRoomButton.textContent = "Creating room…";
+  connectionError.textContent = "Connecting to the multiplayer service…";
   networkMode = true;
   isHost = true;
   myNetworkId = "host";
   roomCode = randomRoomCode();
   maxOnlinePlayers = Number(document.querySelector("#online-count").value);
   lobbyPlayers = [{ id: "host", name: onlineName(), color: COLORS[0] }];
-  peer = new Peer(`ludo-party-${roomCode}`);
-  peer.on("open", showLobby);
+  peer = new Peer(`ludo-party-${roomCode}`, {
+    debug: 1,
+    config: {
+      iceServers: [
+        { urls: "stun:stun.l.google.com:19302" },
+        { urls: "stun:stun1.l.google.com:19302" }
+      ]
+    }
+  });
+  const createTimeout = setTimeout(() => {
+    if (!peer || !peer.open) {
+      closeNetwork();
+      createRoomButton.disabled = false;
+      createRoomButton.textContent = "Create room";
+      connectionError.textContent = "The room service could not connect. Refresh the page and try again.";
+    }
+  }, 10000);
+  peer.on("open", () => {
+    clearTimeout(createTimeout);
+    createRoomButton.disabled = false;
+    createRoomButton.textContent = "Create room";
+    connectionError.textContent = "";
+    showLobby();
+  });
   peer.on("connection", acceptConnection);
   peer.on("error", error => {
     if (error.type === "unavailable-id") return createRoom();
-    connectionError.textContent = "Could not create the room. Please try again.";
+    clearTimeout(createTimeout);
+    connectionError.textContent = "Could not create the room. Refresh the page and try again.";
+    createRoomButton.disabled = false;
+    createRoomButton.textContent = "Create room";
     resetToSetup();
   });
 }
@@ -376,9 +407,12 @@ function createRoom() {
 function joinRoom() {
   connectionError.textContent = "";
   if (typeof Peer === "undefined") return connectionError.textContent = "Online service did not load. Check your internet and try again.";
+  if (!navigator.onLine) return connectionError.textContent = "You appear to be offline. Connect to the internet and try again.";
   roomCode = document.querySelector("#room-code-input").value.trim().toUpperCase();
   if (roomCode.length !== 6) return connectionError.textContent = "Enter the 6-character room code.";
   closeNetwork();
+  joinRoomButton.disabled = true;
+  joinRoomButton.textContent = "Joining…";
   networkMode = true;
   isHost = false;
   peer = new Peer();
@@ -389,7 +423,11 @@ function joinRoom() {
     hostConnection.on("data", handleGuestMessage);
     hostConnection.on("close", () => setStatus("The host disconnected."));
     setTimeout(() => {
-      if (!hostConnection || !hostConnection.open) connectionError.textContent = "Room not found. Check the code and try again.";
+      if (!hostConnection || !hostConnection.open) {
+        lobbyStatus.textContent = "Room not found. Check the code and try again.";
+        joinRoomButton.disabled = false;
+        joinRoomButton.textContent = "Join room";
+      }
     }, 7000);
   });
   lobbyPlayers = [{ id: myNetworkId, name: onlineName(), color: COLORS[0] }];
@@ -425,6 +463,8 @@ function handleHostMessage(conn, data) {
 function handleGuestMessage(data) {
   if (!data || typeof data !== "object") return;
   if (data.type === "accepted") {
+    joinRoomButton.disabled = false;
+    joinRoomButton.textContent = "Join room";
     myNetworkId = data.id;
     lobbyPlayers = data.players;
     maxOnlinePlayers = data.maxOnlinePlayers;
@@ -510,6 +550,10 @@ function closeNetwork() {
   networkMode = false;
   isHost = false;
   myNetworkId = null;
+  createRoomButton.disabled = false;
+  createRoomButton.textContent = "Create room";
+  joinRoomButton.disabled = false;
+  joinRoomButton.textContent = "Join room";
 }
 
 document.querySelector("#create-room").addEventListener("click", createRoom);

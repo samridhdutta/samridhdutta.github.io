@@ -81,6 +81,24 @@ h1 span { color: var(--red); }
 .name-field span, .turn-dot { flex: 0 0 auto; width: 13px; height: 13px; border-radius: 50%; background: var(--player-color); }
 .name-field input { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; color: var(--ink); outline: none; }
 .name-field input:focus { border-color: var(--player-color); box-shadow: 0 0 0 3px color-mix(in srgb, var(--player-color) 18%, transparent); }
+.or-divider { display: flex; align-items: center; gap: 12px; margin: 24px 0; color: var(--muted); font-size: .78rem; font-weight: 800; text-transform: uppercase; }
+.or-divider::before, .or-divider::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.online-setup h2 { margin-bottom: 14px; }
+.field-label { display: block; margin: 9px 0 5px; color: var(--muted); font-size: .75rem; font-weight: 800; text-transform: uppercase; }
+.text-input { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: white; color: var(--ink); outline: none; }
+.text-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(57,132,230,.14); }
+.online-actions { display: grid; grid-template-columns: 1fr 1.25fr; align-items: end; gap: 9px; margin-top: 4px; }
+.online-actions .primary-btn { margin-bottom: 1px; }
+.join-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; margin-top: 12px; }
+.room-input { text-align: center; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+.connection-error { min-height: 1.2em; margin: 8px 0 0; color: var(--red); font-size: .8rem; font-weight: 700; }
+.room-code { padding: 3px 8px; border: 1px dashed var(--blue); border-radius: 9px; background: rgba(57,132,230,.08); color: var(--blue); font: inherit; letter-spacing: .08em; }
+.lobby-hint, .lobby-status { color: var(--muted); font-size: .88rem; }
+.lobby-players { display: grid; gap: 8px; margin: 18px 0; }
+.lobby-player { display: flex; align-items: center; gap: 10px; padding: 11px; border-radius: 11px; background: #f5f4f0; font-weight: 800; }
+.lobby-player .mini-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--player-color); }
+.lobby-player small { margin-left: auto; color: var(--muted); }
+.lobby-status { text-align: center; }
 .primary-btn, .secondary-btn { border: 0; border-radius: 12px; font-weight: 800; transition: transform .15s, opacity .15s; }
 .primary-btn { width: 100%; padding: 12px 18px; background: var(--ink); color: white; box-shadow: 0 5px 0 #0e1020; }
 .primary-btn:hover, .secondary-btn:hover { transform: translateY(-2px); }

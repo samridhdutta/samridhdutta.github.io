@@ -27,15 +27,46 @@
 
       <aside class="game-panel">
         <section id="setup-card" class="panel-card setup-card">
-          <p class="card-kicker">Game setup</p>
-          <h2>Who’s playing?</h2>
+          <p class="card-kicker">Same-device game</p>
+          <h2>Pass & play</h2>
           <div class="player-count" role="group" aria-label="Number of players">
             <button type="button" data-count="2">2</button>
             <button type="button" data-count="3">3</button>
             <button class="active" type="button" data-count="4">4</button>
           </div>
           <div id="name-fields" class="name-fields"></div>
-          <button id="start-game" class="primary-btn" type="button">Start the party</button>
+          <button id="start-game" class="primary-btn" type="button">Play on this device</button>
+          <div class="or-divider"><span>or</span></div>
+          <div class="online-setup">
+            <p class="card-kicker">Online multiplayer</p>
+            <h2>Play on 2–3 devices</h2>
+            <label class="field-label" for="online-name">Your name</label>
+            <input id="online-name" class="text-input" maxlength="14" value="Player 1" />
+            <div class="online-actions">
+              <div>
+                <label class="field-label" for="online-count">Devices</label>
+                <select id="online-count" class="text-input">
+                  <option value="2">2 devices</option>
+                  <option value="3" selected>3 devices</option>
+                </select>
+              </div>
+              <button id="create-room" class="primary-btn" type="button">Create room</button>
+            </div>
+            <div class="join-row">
+              <input id="room-code-input" class="text-input room-input" maxlength="6" placeholder="ROOM CODE" aria-label="Room code" />
+              <button id="join-room" class="secondary-btn" type="button">Join room</button>
+            </div>
+            <p id="connection-error" class="connection-error" aria-live="polite"></p>
+          </div>
+        </section>
+
+        <section id="lobby-card" class="panel-card lobby-card hidden" aria-live="polite">
+          <p class="card-kicker">Online room</p>
+          <h2>Room <button id="copy-room" class="room-code" type="button" title="Copy room code">------</button></h2>
+          <p class="lobby-hint">Open this game on another device and enter the room code.</p>
+          <div id="lobby-players" class="lobby-players"></div>
+          <p id="lobby-status" class="lobby-status">Waiting for players…</p>
+          <button id="online-start" class="primary-btn hidden" type="button" disabled>Start online game</button>
         </section>
 
         <section id="play-card" class="panel-card play-card hidden" aria-live="polite">
@@ -80,6 +111,7 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
